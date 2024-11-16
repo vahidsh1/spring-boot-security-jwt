@@ -1,0 +1,5 @@
+-- INSERT INTO roles(name) VALUES('ROLE_USER');
+-- INSERT INTO roles(name) VALUES('ROLE_MODERATOR');
+-- INSERT INTO roles(name) VALUES('ROLE_ADMIN');
+-- insert into user (id,username, email, password) values (1,'vahid', '$2y$10$8QlFvBG4s75EC3cXWdtJ6./w3aATwGhm4PEZvByY3jMWsGbB8Pg96', 'vahidsh1@gmail.com');
+--
