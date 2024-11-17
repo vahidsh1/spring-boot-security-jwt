@@ -7,8 +7,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jdk.jfr.DataAmount;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+
 @Table(name = "users", 
     uniqueConstraints = { 
       @UniqueConstraint(columnNames = "username"),
@@ -32,6 +36,9 @@ public class User {
   @Size(max = 120)
   private String password;
 
+
+  @Column(columnDefinition = "boolean DEFAULT TRUE")
+  private boolean isFirstLogin;
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(  name = "user_roles", 
         joinColumns = @JoinColumn(name = "user_id"), 
@@ -40,9 +47,17 @@ public class User {
 
   public User() {
   }
+  public boolean isFirstLogin() {
+    return isFirstLogin;
+  }
 
-  public User(String username, String email, String password) {
+  public void setFirstLogin(boolean firstLogin) {
+    isFirstLogin = firstLogin;
+  }
+
+  public User(String username,boolean isFirstLogin, String email, String password) {
     this.username = username;
+    this.isFirstLogin = isFirstLogin;
     this.email = email;
     this.password = password;
   }
