@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.security;
 
+import com.bezkoder.springjwt.filter.FirstLoginFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.bezkoder.springjwt.security.jwt.AuthEntryPointJwt;
 import com.bezkoder.springjwt.security.jwt.AuthTokenFilter;
 import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -28,6 +30,8 @@ import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
 public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
   @Autowired
   UserDetailsServiceImpl userDetailsService;
+  @Autowired
+  AuthenticationManager authenticationManager;
 
   @Autowired
   private AuthEntryPointJwt unauthorizedHandler;
@@ -67,6 +71,13 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+            .csrf(csrf -> csrf.disable())
+            .authorizeRequests()
+            .requestMatchers("/auth/changepassword").permitAll() // Allow access to change password
+            .anyRequest().authenticated()
+            .and()
+            .addFilterBefore(new FirstLoginFilter(authenticationManager), BasicAuthenticationFilter.class);
     http.csrf(csrf -> csrf.disable())
         .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
