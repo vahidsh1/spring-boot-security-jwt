@@ -14,27 +14,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
-
     private Long id;
-
     private String username;
-
     private String email;
     private boolean isFirstLogin;
-
     public boolean isFirstLogin() {
         return isFirstLogin;
     }
-
     public void setFirstLogin(boolean firstLogin) {
         isFirstLogin = firstLogin;
     }
-
     @JsonIgnore
     private String password;
-
     private Collection<? extends GrantedAuthority> authorities;
-
     public UserDetailsImpl(Long id, String username, String email, String password, boolean isFirstLogin,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
@@ -44,12 +36,10 @@ public class UserDetailsImpl implements UserDetails {
         this.isFirstLogin = isFirstLogin;
         this.authorities = authorities;
     }
-
     public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toList());
-
         return new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
@@ -58,50 +48,40 @@ public class UserDetailsImpl implements UserDetails {
                 user.isFirstLogin(),
                 authorities);
     }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
-
     public Long getId() {
         return id;
     }
-
     public String getEmail() {
         return email;
     }
-
     @Override
     public String getPassword() {
         return password;
     }
-
     @Override
     public String getUsername() {
         return username;
     }
-
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
-
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
-
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
-
     @Override
     public boolean isEnabled() {
         return true;
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o)
