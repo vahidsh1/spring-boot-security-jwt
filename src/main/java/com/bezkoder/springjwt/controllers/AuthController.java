@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.bezkoder.springjwt.payload.request.PasswordChangeRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
@@ -75,7 +76,6 @@ public class AuthController {
                 roles));
 
     }
-
 
 
     @PostMapping("/signup")
@@ -139,5 +139,31 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+
+    @PostMapping("/passwordchange")
+    public ResponseEntity<?> passwordChange(@Valid @RequestBody PasswordChangeRequest passwordChangeRequest) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+
+        if (!userDetails.getUsername().equals(passwordChangeRequest.getOldPassword())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    new MessageResponse("You are not authorized to change other usernames."));
+        }
+        if (!passwordChangeRequest.getNewPassword().equals(passwordChangeRequest.getOldPassword())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("You must enter new password which is not equal to previous one"));
+        }
+
+
+        return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Error: sasas is already taken!"));
+
+
     }
 }

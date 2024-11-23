@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.security;
 
+import com.bezkoder.springjwt.security.services.CustomAuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.bezkoder.springjwt.security.jwt.AuthEntryPointJwt;
 import com.bezkoder.springjwt.security.jwt.AuthTokenFilter;
 import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -28,7 +30,8 @@ import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
 public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
   @Autowired
   UserDetailsServiceImpl userDetailsService;
-
+  @Autowired
+  private CustomAuthenticationSuccessHandler successHandler;
   @Autowired
   private AuthEntryPointJwt unauthorizedHandler;
 
@@ -67,13 +70,26 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
-        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/signin").permitAll()
-              .requestMatchers("/api/auth/signup").hasRole("ADMIN")
-              .anyRequest().authenticated()
-        );
+    http
+            .authorizeRequests()
+            .requestMatchers("/change-password").authenticated()
+            .anyRequest().permitAll()
+            .and()
+            .formLogin()
+            .loginPage("/login")
+            .successHandler(successHandler) // Use custom success handler
+            .permitAll()
+            .and()
+            .logout()
+            .permitAll();
+
+//    http.csrf(csrf -> csrf.disable())
+//        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+//        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//        .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/login").permitAll()
+//              .requestMatchers("/api/auth/signup").hasRole("ADMIN")
+//              .anyRequest().authenticated()
+//        );
     
     http.authenticationProvider(authenticationProvider());
 
