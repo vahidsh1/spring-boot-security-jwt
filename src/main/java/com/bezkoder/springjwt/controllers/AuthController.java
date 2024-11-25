@@ -2,6 +2,7 @@ package com.bezkoder.springjwt.controllers;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -143,27 +144,35 @@ public class AuthController {
 
 
     @PostMapping("/passwordchange")
-    public ResponseEntity<?> passwordChange(@Valid @RequestBody PasswordChangeRequest passwordChangeRequest) {
-
+    public ResponseEntity<?> passwordChange(@RequestBody PasswordChangeRequest passwordChangeRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        System.out.println("asasasAS");
+//        if ( passwordChangeRequest.getOldPassword().equals(passwordChangeRequest.getNewPassword())) {
+//            return ResponseEntity
+//                    .badRequest()
+//                    .body(new MessageResponse("Error: You new password and the old one is the same please use new one!!!"));
+//        }
+//        if (!userDetails.getUsername().equals(passwordChangeRequest.getUsername())) {
+//
+//            return ResponseEntity
+//                    .badRequest()
+//                    .body(new MessageResponse("Error: You are not authorize to change the requested password!"));
+//        }
 
+        userRepository.setPasswordByUsername(passwordChangeRequest.getUsername(), passwordChangeRequest.getNewPassword());
 
-        if (!userDetails.getUsername().equals(passwordChangeRequest.getOldPassword())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                    new MessageResponse("You are not authorized to change other usernames."));
+        if (((UserDetailsImpl) (authentication).getPrincipal()).isFirstLogin()) {
+            userRepository.setIsFirstLoginByUsername(userDetails.getUsername());
         }
-        if (!passwordChangeRequest.getNewPassword().equals(passwordChangeRequest.getOldPassword())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("You must enter new password which is not equal to previous one"));
-        }
-
 
         return ResponseEntity
                 .badRequest()
-                .body(new MessageResponse("Error: sasas is already taken!"));
-
+                .body(new MessageResponse("Your password changed successfully! "));
 
     }
+
 }
+
+
+

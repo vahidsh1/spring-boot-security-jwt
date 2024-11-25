@@ -70,26 +70,26 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-            .authorizeRequests()
-            .requestMatchers("/change-password").authenticated()
-            .anyRequest().permitAll()
-            .and()
-            .formLogin()
-            .loginPage("/login")
-            .successHandler(successHandler) // Use custom success handler
-            .permitAll()
-            .and()
-            .logout()
-            .permitAll();
+//    http
+//            .authorizeRequests()
+//            .requestMatchers("/change-password").authenticated()
+//            .anyRequest().permitAll()
+//            .and()
+//            .formLogin()
+//            .loginPage("/login")
+//            .successHandler(successHandler) // Use custom success handler
+//            .permitAll()
+//            .and()
+//            .logout()
+//            .permitAll();
 
-//    http.csrf(csrf -> csrf.disable())
-//        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-//        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//        .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/login").permitAll()
-//              .requestMatchers("/api/auth/signup").hasRole("ADMIN")
-//              .anyRequest().authenticated()
-//        );
+    http.csrf(csrf -> csrf.disable())
+        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/login").permitAll()
+              .requestMatchers("/api/auth/signup").hasRole("ADMIN")
+              .anyRequest().authenticated()
+        );
     
     http.authenticationProvider(authenticationProvider());
 
