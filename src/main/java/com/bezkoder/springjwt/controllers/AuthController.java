@@ -2,11 +2,10 @@ package com.bezkoder.springjwt.controllers;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.bezkoder.springjwt.payload.request.PasswordChangeRequest;
+import com.bezkoder.springjwt.payload.request.UpdatePasswordRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -143,32 +143,37 @@ public class AuthController {
     }
 
 
-    @PostMapping("/passwordchange")
-    public ResponseEntity<?> passwordChange(@RequestBody PasswordChangeRequest passwordChangeRequest) {
+    @PostMapping("/update-password")
+    public ResponseEntity<?> passwordChange(@RequestBody UpdatePasswordRequest updatePasswordRequest) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("register password change");
         UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        System.out.println("asasasAS");
-//        if ( passwordChangeRequest.getOldPassword().equals(passwordChangeRequest.getNewPassword())) {
-//            return ResponseEntity
-//                    .badRequest()
-//                    .body(new MessageResponse("Error: You new password and the old one is the same please use new one!!!"));
-//        }
-//        if (!userDetails.getUsername().equals(passwordChangeRequest.getUsername())) {
-//
-//            return ResponseEntity
-//                    .badRequest()
-//                    .body(new MessageResponse("Error: You are not authorize to change the requested password!"));
-//        }
-
-        userRepository.setPasswordByUsername(passwordChangeRequest.getUsername(), passwordChangeRequest.getNewPassword());
-
-        if (((UserDetailsImpl) (authentication).getPrincipal()).isFirstLogin()) {
-            userRepository.setIsFirstLoginByUsername(userDetails.getUsername());
+        System.out.println("register password change221212");
+        if (updatePasswordRequest.getOldPassword().equals(updatePasswordRequest.getNewPassword())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: You new password and the old one is the same please use new one!!!"));
+        }
+        if (!userDetails.getUsername().equals(updatePasswordRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: You are not authorize to change the requested password!"));
+        }
+        // Find the user by username or throw an exception if not found
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        // Check if the current password matches
+        if (!encoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword())) {
+            throw new Exception("Current password is incorrect");
         }
 
-        return ResponseEntity
-                .badRequest()
-                .body(new MessageResponse("Your password changed successfully! "));
+        user.setPassword(encoder.encode(updatePasswordRequest.getNewPassword()));
+        if (((UserDetailsImpl) (authentication).getPrincipal()).isFirstLogin()) {
+            user.setFirstLogin(false);
+        }
+        userRepository.save(user);
+        return ResponseEntity.ok(new MessageResponse("Your password changed successfully!"));
+
 
     }
 
