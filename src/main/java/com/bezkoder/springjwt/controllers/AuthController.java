@@ -100,12 +100,6 @@ public class AuthController {
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
-
-        // Create new user's account
-        User user = new User(signUpRequest.getUsername(), true,
-                signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
-
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
@@ -135,16 +129,17 @@ public class AuthController {
                 }
             });
         }
-
-        user.setRoles(roles);
+        // Create new user's account
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()), true, roles);
         userRepository.save(user);
-
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-
     @PostMapping("/update-password")
-    public ResponseEntity<?> passwordChange(@RequestBody UpdatePasswordRequest updatePasswordRequest) throws Exception {
+    public ResponseEntity<?> passwordChange(@RequestBody UpdatePasswordRequest updatePasswordRequest) throws
+            Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         System.out.println("register password change");
         UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -152,12 +147,12 @@ public class AuthController {
         if (updatePasswordRequest.getOldPassword().equals(updatePasswordRequest.getNewPassword())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: You new password and the old one is the same please use new one!!!"));
+                    .body(new MessageResponse("Error: Your new password and the old one is the same please use new one!!!"));
         }
         if (!userDetails.getUsername().equals(updatePasswordRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: You are not authorize to change the requested password!"));
+                    .body(new MessageResponse("Error: You are not authorize to changing password for requested username!"));
         }
         // Find the user by username or throw an exception if not found
         User user = userRepository.findByUsername(userDetails.getUsername())
