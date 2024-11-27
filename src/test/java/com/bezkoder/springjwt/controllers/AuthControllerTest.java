@@ -6,6 +6,7 @@ import com.bezkoder.springjwt.models.User;
 import com.bezkoder.springjwt.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
@@ -28,7 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @SpringBootTest
-
+@RunWith(SpringRunner.class)
+//@DataJpaTest
 class AuthControllerTest {
     MockMvc mockMvc;
     @Autowired
@@ -41,7 +43,7 @@ class AuthControllerTest {
     WebMvcAutoConfiguration webMvcAutoConfiguration;
 //
     @Test
-    public void signupUser() throws Exception {
+    public void givenUserEntity_whenSaveUser_thenUserIsPersisted() throws Exception {
         Set set = new HashSet();
         Role role_admin = new Role(1, ERole.ROLE_ADMIN);
         Role role_moderator = new Role(2, ERole.ROLE_MODERATOR);
