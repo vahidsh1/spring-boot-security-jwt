@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -20,18 +21,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@AutoConfigureMockMvc
+
 //@DataJpaTest
 class AuthControllerTest {
+
+    @Autowired
     MockMvc mockMvc;
     @Autowired
     PasswordEncoder encoder;
@@ -41,7 +46,7 @@ class AuthControllerTest {
     AuthController authController;
     @Autowired
     WebMvcAutoConfiguration webMvcAutoConfiguration;
-//
+
     @Test
     public void givenUserEntity_whenSaveUser_thenUserIsPersisted() throws Exception {
         Set set = new HashSet();
@@ -51,12 +56,12 @@ class AuthControllerTest {
         set.add(role_admin);
         set.add(role_moderator);
         set.add(role_user);
-        User user = new User( "vahid", "vahidsh1@gmail.com",
+        User user = new User(1L, "vahid", "vahidsh1@gmail.com",
                 encoder.encode("123456"), true, set);
         userRepository.save(user);
 
         RequestBuilder request = MockMvcRequestBuilders
-                .post("/login")
+                .post("/api/auth/login")
                 .accept(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"vahid\",\"password\":\"123456\"}")
                 .contentType(MediaType.APPLICATION_JSON);
@@ -64,4 +69,14 @@ class AuthControllerTest {
                 .andExpect(status().isOk()).andReturn();
     }
 
+    @Test
+    public void givenAnyUserEntity_whenLogin_thenNotReturnAccessDenied() throws Exception {
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/auth/login")
+                .accept(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"vahid\",\"password\":\"1q23456\"}")
+                .contentType(MediaType.APPLICATION_JSON);
+                MvcResult result = (MvcResult) mockMvc.perform(request).andExpect(status().isOk());
+    }
 }
