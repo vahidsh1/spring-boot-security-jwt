@@ -1,6 +1,6 @@
 package com.bezkoder.springjwt.payload.request;
 
-import com.bezkoder.springjwt.models.User;
+import com.bezkoder.springjwt.entity.User;
 import jakarta.persistence.*;
 
 import java.util.Date;

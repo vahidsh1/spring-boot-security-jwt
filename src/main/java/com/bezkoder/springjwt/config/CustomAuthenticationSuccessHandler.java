@@ -1,13 +1,11 @@
-package com.bezkoder.springjwt.security.services;
+package com.bezkoder.springjwt.config;
 
-import com.bezkoder.springjwt.models.User;
+import com.bezkoder.springjwt.entity.User;
 import com.bezkoder.springjwt.repository.UserRepository;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.bezkoder.springjwt.models;
+package com.bezkoder.springjwt.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

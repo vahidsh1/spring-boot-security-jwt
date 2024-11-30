@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.bezkoder.springjwt.models.User;
+import com.bezkoder.springjwt.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {

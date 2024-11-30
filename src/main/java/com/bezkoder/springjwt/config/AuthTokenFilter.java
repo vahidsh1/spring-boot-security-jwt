@@ -1,7 +1,8 @@
-package com.bezkoder.springjwt.security.jwt;
+package com.bezkoder.springjwt.config;
 
 import java.io.IOException;
 
+import com.bezkoder.springjwt.security.jwt.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
