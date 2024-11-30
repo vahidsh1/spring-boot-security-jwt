@@ -27,13 +27,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String username = authentication.getName();
         Optional<User> user = userRepository.findByUsername(username); // Fetch user details
 
-//        if (user.orElse(null) == null) {
-//
-//            response.sendError(400, "you must change your password before first login");
-//        } else {
-//            // Redirect to the default page or dashboard
-//            response.sendRedirect("/home");
-//        }
+
     }
 
 

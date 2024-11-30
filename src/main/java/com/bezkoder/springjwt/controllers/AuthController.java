@@ -140,10 +140,9 @@ public class AuthController {
     @PostMapping("/update-password")
     public ResponseEntity<?> passwordChange(@RequestBody UpdatePasswordRequest updatePasswordRequest) throws
             Exception {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("register password change");
         UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        System.out.println("register password change221212");
         if (updatePasswordRequest.getOldPassword().equals(updatePasswordRequest.getNewPassword())) {
             return ResponseEntity
                     .badRequest()
