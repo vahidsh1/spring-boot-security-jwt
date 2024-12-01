@@ -21,9 +21,7 @@ public class UserAuditDto {
     @JoinColumn(name = "user_id")
     private User user;
     @Column(nullable = false)
-    private String actionDate;
-    @Column(nullable = false)
-    private String actionTime;
+    private String actionTimestamp;
     @Column(nullable = false)
     private String actionResult;
     @Column(nullable = false)
