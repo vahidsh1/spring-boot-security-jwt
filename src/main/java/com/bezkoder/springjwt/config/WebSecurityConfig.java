@@ -30,6 +30,8 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
   private CustomAuthenticationSuccessHandler successHandler;
   @Autowired
   private AuthEntryPointJwt unauthorizedHandler;
+@Autowired
+CustomAuthenticationSuccessHandler  customAuthenticationSuccessHandler;
 
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -66,6 +68,25 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+            .csrf(csrf -> csrf.disable())
+            .exceptionHandling(exception
+                    -> exception.authenticationEntryPoint(unauthorizedHandler))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/api/auth/signup").hasRole("ADMIN")
+                    .anyRequest().authenticated()
+            )
+            .formLogin()
+            .successHandler(customAuthenticationSuccessHandler)
+            .and()
+            .httpBasic();
+
+    http.authenticationProvider(authenticationProvider());
+
+    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
 //    http
 //            .authorizeRequests()
 //            .requestMatchers("/change-password").authenticated()
@@ -79,19 +100,14 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
 //            .logout()
 //            .permitAll();
 
-    http.csrf(csrf -> csrf.disable())
-        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/login").permitAll()
-              .requestMatchers("/api/auth/signup").hasRole("ADMIN")
-              .anyRequest().authenticated()
-        );
-    
-    http.authenticationProvider(authenticationProvider());
+//    http.csrf(csrf -> csrf.disable())
+//        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+//        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//        .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/login").permitAll()
+//              .requestMatchers("/api/auth/signup").hasRole("ADMIN")
+//              .anyRequest().authenticated()
+//        );
 
-    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-    return http.build();
   }
 
 }

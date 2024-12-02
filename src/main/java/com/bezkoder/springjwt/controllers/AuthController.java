@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.bezkoder.springjwt.annotation.Loggable;
 import com.bezkoder.springjwt.payload.request.UpdatePasswordRequest;
 import jakarta.validation.Valid;
 
@@ -56,6 +57,7 @@ public class AuthController {
     JwtUtils jwtUtils;
 
     @PostMapping("/login")
+    @Loggable
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
