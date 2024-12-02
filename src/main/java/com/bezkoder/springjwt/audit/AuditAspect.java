@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.audit;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -10,10 +11,17 @@ import org.springframework.stereotype.Component;
 public class AuditAspect {
 
     //    @Pointcut("@annotation(Log)")
-    @Pointcut("execution(* com.bezkoder.springjwt.controllers.AuthController.authenticateUser())")
+    @Before("execution(* com.bezkoder.springjwt.controllers.*.*(..))")
+//    @Before("execution(* com.xyz.dao.*.*(..))")
     public void logPointcut(){
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
     }
+    @Before("execution(* org.springframework.security.web.FilterChainProxy.*(..))")
+        public void logAround()  {
 
+
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5");
+    }
     @Before("@annotation(com.bezkoder.springjwt.annotation.Loggable)")
 //    @Before("annotation(Pointcut.class)")
     public void logAllMethodCallsAdvice(){
