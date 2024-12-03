@@ -1,33 +1,104 @@
 package com.bezkoder.springjwt.audit;
 
+import com.bezkoder.springjwt.config.AuthTokenFilter;
+import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
+import org.apache.juli.logging.LogFactory;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
+
+import java.util.logging.Logger;
 
 @Component
 @Aspect
 public class AuditAspect {
+    @Autowired
+    AuthTokenFilter authTokenFilter;
+    @Autowired
+    UserDetailsServiceImpl userDetailsServiceImpl;
 
-    //    @Pointcut("@annotation(Log)")
-    @Before("execution(* com.bezkoder.springjwt.controllers.*.*(..))")
+    Logger logger = Logger.getLogger(AuditAspect.class.getName());
+
+    @Aspect
+    @Component
+    public class MyAspect {
+
+        @After("execution(* com.bezkoder.springjwt.config.AuthTokenFilter.doFilter(..))")
+        public void afterFilterExecution2() {
+            logger.info(SecurityContextHolder.getContext().toString());
+            // ... your logic here
+        }
+
+        //    @Pointcut("@annotation(Log)")
+//        @After("execution(* com.bezkoder.springjwt.security.services.UserDetailsServiceImpl.*(..))")
+////    @Before("execution(* com.xyz.dao.*.*(..))")
+//        public void logPointcut() {
+//            System.out.println("222222&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+//
+//            userDetailsServiceImpl.toString();
+//            authTokenFilter.toString();
+//            SecurityContext context = SecurityContextHolder.getContext();
+//            System.out.println(context.toString() + "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+//        }
+
+        @After("execution(* org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.*(..))")
 //    @Before("execution(* com.xyz.dao.*.*(..))")
-    public void logPointcut(){
-        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-    }
-    @Before("execution(* org.springframework.security.web.FilterChainProxy.*(..))")
-        public void logAround()  {
+        public void ffffff() {
+            System.out.println("222222&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+
+//            userDetailsServiceImpl.loadUserByUsername();
+            authTokenFilter.toString();
+            SecurityContext context = SecurityContextHolder.getContext();
+            System.out.println(context.toString() + "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        }
 
 
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5");
+        @After("execution(* org.springframework.security.authentication.AnonymousAuthenticationToken.*(..))")
+        public void afterFilterExecution() {
+            authTokenFilter.toString();
+            SecurityContext context = SecurityContextHolder.getContext();
+            // Extract information from context (e.g., Authentication)
+            Authentication authentication = context.getAuthentication();
+            if (authentication != null) {
+                System.out.println("Extracted username:  ****************** " + authentication.getName());
+            } else {
+                System.out.println("No authentication found O)()I)I)UI)I)IU)I)");
+            }
+        }
     }
-    @Before("@annotation(com.bezkoder.springjwt.annotation.Loggable)")
-//    @Before("annotation(Pointcut.class)")
-    public void logAllMethodCallsAdvice(){
-        System.out.println("***********************************************************In Aspect ");
-    }
+//    @Before("execution(* org.springframework.security.web.FilterChainProxy.*(..))")
+//        public Object logAround(ProceedingJoinPoint pjp) throws Throwable {
+//            // start stopwatch
+//            Object retVal = pjp.proceed();
+//            // stop stopwatch
+//        System.out.println("&&&&&&&&%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//            return retVal;
+//        }
+
+//    @After("execution(* org.springframework.security.web.context.SecurityContextHolderFilter.*(..))")
+//    public Object logAroundSecurity(JoinPoint jp) throws Throwable {
+//        // start stopwatch
+//        Object retVal = jp.toString();
+//        // stop stopwatch
+//        System.out.println("&&&&&&&&%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        return retVal;
+//    }
+//    @Before("@annotation(com.bezkoder.springjwt.annotation.Loggable)")
+////    @Before("annotation(Pointcut.class)")
+//    public void logAllMethodCallsAdvice(){
+//        System.out.println("***********************************************************In Aspect ");
+//    }
 }
+
 //@Aspect
 //@Component
 //public class AuditAspect {
