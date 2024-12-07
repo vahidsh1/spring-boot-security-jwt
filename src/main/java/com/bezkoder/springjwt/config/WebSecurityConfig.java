@@ -1,5 +1,7 @@
 package com.bezkoder.springjwt.config;
 
+import com.bezkoder.springjwt.filter.RestAccessDeniedHandler;
+import com.bezkoder.springjwt.filter.RestAuthenticationFailureHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,90 +26,69 @@ import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
 // jsr250Enabled = true,
 // prePostEnabled = true) // by default
 public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
-  @Autowired
-  UserDetailsServiceImpl userDetailsService;
-  @Autowired
-  private CustomAuthenticationSuccessHandler successHandler;
-  @Autowired
-  private AuthEntryPointJwt unauthorizedHandler;
-@Autowired
-CustomAuthenticationSuccessHandler  customAuthenticationSuccessHandler;
+    @Autowired
+    UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
+    @Autowired
+    private AuthEntryPointJwt authEntryPointJwt;
+    @Autowired
+    CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
-  @Bean
-  public AuthTokenFilter authenticationJwtTokenFilter() {
-    return new AuthTokenFilter();
-  }
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
 
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+    @Bean
+    public AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
+    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-  
-  @Bean
-  public DaoAuthenticationProvider authenticationProvider() {
-      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-       
-      authProvider.setUserDetailsService(userDetailsService);
-      authProvider.setPasswordEncoder(passwordEncoder());
-   
-      return authProvider;
-  }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/h2-console/**");
+    }
 
-  
-  @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-    return authConfig.getAuthenticationManager();
-  }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(
+                        auth -> auth.requestMatchers("/api/auth/login").permitAll()
+                                .requestMatchers("/api/auth/signup").hasRole("ADMIN")
+                                .anyRequest().authenticated()
+                );
+        http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
 
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    @Bean
+    RestAccessDeniedHandler accessDeniedHandler() {
+        return new RestAccessDeniedHandler();
+    }
 
-  @Bean
-  public WebSecurityCustomizer webSecurityCustomizer() {
-    return (web) -> web.ignoring().requestMatchers("/h2-console/**");
-  }
+//    @Bean
+//    AuthEntryPointJwt authEntryPointJwt() {
+//        return new AuthEntryPointJwt();
+//    }
 
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-            .csrf(csrf -> csrf.disable())
-            .exceptionHandling(exception
-                    -> exception.authenticationEntryPoint(unauthorizedHandler))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/login").permitAll()
-                    .requestMatchers("/api/auth/signup").hasRole("ADMIN")
-                    .anyRequest().authenticated()
-            )
-            .formLogin()
-            .successHandler(customAuthenticationSuccessHandler)
-            .and()
-            .httpBasic();
-
-    http.authenticationProvider(authenticationProvider());
-
-    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-    return http.build();
-//    http
-//            .authorizeRequests()
-//            .requestMatchers("/change-password").authenticated()
-//            .anyRequest().permitAll()
-//            .and()
-//            .formLogin()
-//            .loginPage("/login")
-//            .successHandler(successHandler) // Use custom success handler
-//            .permitAll()
-//            .and()
-//            .logout()
-//            .permitAll();
-
-//    http.csrf(csrf -> csrf.disable())
-//        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-//        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//        .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/login").permitAll()
-//              .requestMatchers("/api/auth/signup").hasRole("ADMIN")
-//              .anyRequest().authenticated()
-//        );
-
-  }
+    @Bean
+    RestAuthenticationFailureHandler authenticationFailureHandler() {
+        return new RestAuthenticationFailureHandler();
+    }
 
 }

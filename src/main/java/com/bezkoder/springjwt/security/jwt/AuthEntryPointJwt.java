@@ -11,7 +11,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
@@ -26,14 +28,47 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
   public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
       throws IOException, ServletException {
     logger.error("Unauthorized error: {}", authException.getMessage());
+    int status;
+    String errorMessage;
 
+    // Determine the status and message based on the type of exception
+    if (authException instanceof UsernameNotFoundException) {
+      status = HttpServletResponse.SC_NOT_FOUND;
+      errorMessage = "User not found";
+    } else if (authException instanceof BadCredentialsException) {
+      status = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = "Invalid username or password";
+    }else if (authException instanceof AccountExpiredException) {
+      status = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = "Account is expired";
+    }else if (authException instanceof AuthenticationCredentialsNotFoundException) {
+      status = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = "User not found";
+    }else if (authException instanceof CredentialsExpiredException) {
+      status = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = "Password is expired";
+    }else if (authException instanceof DisabledException) {
+      status = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = "DisabledException";
+    }else if (authException instanceof InternalAuthenticationServiceException) {
+      status = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = "Invalid username or password";
+    }else if (authException instanceof LockedException) {
+      status = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = "Invalid username or password";
+    }else {
+      status = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = "Unauthorized";
+    }
+
+    response.setStatus(status);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
     final Map<String, Object> body = new HashMap<>();
     body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
     body.put("error", "Unauthorized");
-    body.put("message", authException.getMessage());
+//    body.put("message", authException.getMessage());
+    body.put("message", errorMessage);
     body.put("path", request.getServletPath());
 
     final ObjectMapper mapper = new ObjectMapper();
