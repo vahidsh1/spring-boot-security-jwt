@@ -21,7 +21,6 @@ public class RestAuthenticationFailureHandler implements AuthenticationFailureHa
                                         AuthenticationException ex) throws IOException, ServletException, java.io.IOException {
 
         Map<String,Object> response = new HashMap<>();
-        response.put("status","34");
         response.put("message","unauthorized access");
 
         httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

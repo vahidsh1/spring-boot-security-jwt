@@ -23,7 +23,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AccessDeniedException e) throws IOException, ServletException {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "34");
-        response.put("message", "unauthorized api access");
+        response.put("message", "unauthorized api access ******** ");
         //httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
         httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         OutputStream out = httpServletResponse.getOutputStream();
