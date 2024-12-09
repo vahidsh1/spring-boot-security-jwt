@@ -1,4 +1,4 @@
-package com.bezkoder.springjwt.controllers;
+package com.bezkoder.springjwt.controller;
 
 import com.bezkoder.springjwt.entity.ERole;
 import com.bezkoder.springjwt.entity.Role;

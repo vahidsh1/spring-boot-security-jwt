@@ -5,12 +5,15 @@ import com.bezkoder.springjwt.filter.RestAuthenticationFailureHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +43,7 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setHideUserNotFoundExceptions(false);
         return authProvider;
     }
 
@@ -47,10 +51,12 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -60,7 +66,10 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers("/h2-console/**");
     }
-
+//    @Bean
+//    WebSecurityCustomizer debugSecurity() {
+//        return (web) -> web.debug(true);
+//    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
@@ -71,20 +80,34 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
                                 .requestMatchers("/api/auth/signup").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 );
-        http.authenticationProvider(authenticationProvider());
+
+            http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
+
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        return http
+//                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authEntryPointJwt))
+//                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+//                        .requestMatchers(HttpMethod.POST, "/api/locations").hasAnyAuthority("ADMIN", "location_read")
+//                        .requestMatchers(HttpMethod.GET, "/api/locations").hasAnyAuthority("ADMIN", "location_write")
+//                        .requestMatchers("/api/auth/signup/**").hasAuthority("ADMIN")
+//                        .requestMatchers("/api/auth/login/**").permitAll()
+//                        .requestMatchers("/", "/error", "/csrf", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
+//                        .anyRequest().authenticated())
+//                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+//                .authenticationProvider(authenticationProvider())
+//                .cors(Customizer.withDefaults())
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .build();
     }
 
     @Bean
     RestAccessDeniedHandler accessDeniedHandler() {
         return new RestAccessDeniedHandler();
     }
-
-//    @Bean
-//    AuthEntryPointJwt authEntryPointJwt() {
-//        return new AuthEntryPointJwt();
-//    }
 
     @Bean
     RestAuthenticationFailureHandler authenticationFailureHandler() {

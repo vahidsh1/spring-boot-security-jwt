@@ -1,4 +1,4 @@
-package com.bezkoder.springjwt.controllers;
+package com.bezkoder.springjwt.controller;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,11 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.bezkoder.springjwt.entity.ERole;
 import com.bezkoder.springjwt.entity.Role;
@@ -140,7 +136,7 @@ public class AuthController {
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<?> passwordChange(@RequestBody UpdatePasswordRequest updatePasswordRequest) throws
+    public ResponseEntity<?> passwordChange(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) throws
             Exception {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
