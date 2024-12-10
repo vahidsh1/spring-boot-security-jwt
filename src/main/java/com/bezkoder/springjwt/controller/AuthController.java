@@ -54,7 +54,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Loggable
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -78,7 +78,7 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<?> registerUser(@RequestBody SignupRequest signUpRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
@@ -136,7 +136,7 @@ public class AuthController {
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<?> passwordChange(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) throws
+    public ResponseEntity<?> passwordChange(@RequestBody UpdatePasswordRequest updatePasswordRequest) throws
             Exception {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

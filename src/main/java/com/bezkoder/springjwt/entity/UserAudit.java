@@ -39,12 +39,33 @@ public class UserAudit {
     private String sessionId;
     @Column(nullable = false)
     private String actionDetails;
-    @Column(nullable = false)
-    private String oldValue;
-    @Column(nullable = false)
-    private String newValue;
-    @Column(nullable = false)
-    private String reasonForAction;
+//    @Column(nullable = false)
+//    private String oldValue;
+//    @Column(nullable = false)
+//    private String newValue;
+//    @Column(nullable = false)
+//    private String reasonForAction;
+//
+    private String message;
+
+    private String apiMethod;
+
+    private String endpoint;
+
+    private String requestHeaders;
+
+    private String requestBody;
+
+    private Integer responseStatus;
+
+    private String responseHeaders;
+
+    private String responseBody;
+
+    private String authenticationMethod;
+    private String errorMessage;
+
+    // Getters and Setters omitted for brevity
 
     public UserAudit(User user, String actionTimeStamp, boolean actionResult,
                      String ipAddress, String userAgent, String deviceInformation){
@@ -70,9 +91,9 @@ public class UserAudit {
                 ", location='" + location + '\'' +
                 ", sessionId='" + sessionId + '\'' +
                 ", actionDetails='" + actionDetails + '\'' +
-                ", oldValue='" + oldValue + '\'' +
-                ", newValue='" + newValue + '\'' +
-                ", reasonForAction='" + reasonForAction + '\'' +
+//                ", oldValue='" + oldValue + '\'' +
+//                ", newValue='" + newValue + '\'' +
+//                ", reasonForAction='" + reasonForAction + '\'' +
                 '}';
     }
 // Getters and setters

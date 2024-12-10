@@ -85,23 +85,6 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
 
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        return http
-//                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authEntryPointJwt))
-//                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-//                        .requestMatchers(HttpMethod.POST, "/api/locations").hasAnyAuthority("ADMIN", "location_read")
-//                        .requestMatchers(HttpMethod.GET, "/api/locations").hasAnyAuthority("ADMIN", "location_write")
-//                        .requestMatchers("/api/auth/signup/**").hasAuthority("ADMIN")
-//                        .requestMatchers("/api/auth/login/**").permitAll()
-//                        .requestMatchers("/", "/error", "/csrf", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
-//                        .anyRequest().authenticated())
-//                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
-//                .authenticationProvider(authenticationProvider())
-//                .cors(Customizer.withDefaults())
-//                .csrf(AbstractHttpConfigurer::disable)
-//                .build();
     }
 
     @Bean

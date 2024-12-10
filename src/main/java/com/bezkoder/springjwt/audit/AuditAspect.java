@@ -9,6 +9,8 @@ import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -16,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
-import java.util.logging.Logger;
 
 @Component
 @Aspect
@@ -26,8 +27,7 @@ public class AuditAspect {
     @Autowired
     UserDetailsServiceImpl userDetailsServiceImpl;
 
-    Logger logger = Logger.getLogger(AuditAspect.class.getName());
-
+    private static Logger logger = LoggerFactory.getLogger(AuditAspect.class.getName());
     @Aspect
     @Component
     public class MyAspect {
@@ -62,7 +62,7 @@ public class AuditAspect {
         }
 
 
-        @After("execution(* org.springframework.security.authentication.AnonymousAuthenticationToken.*(..))")
+        @After("execution(* org.springframework.security.authentication.AuthenticationManager.*(..))")
         public void afterFilterExecution() {
             authTokenFilter.toString();
             SecurityContext context = SecurityContextHolder.getContext();
