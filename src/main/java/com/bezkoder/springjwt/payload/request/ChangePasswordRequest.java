@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdatePasswordRequest {
+public class ChangePasswordRequest {
 
     @NotBlank
     @Size(min = 3, max = 20)
