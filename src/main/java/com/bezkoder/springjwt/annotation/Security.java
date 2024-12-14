@@ -10,6 +10,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface Security {
-
-    String hasPermission();
+    String hasPermission() default "admin";
 }

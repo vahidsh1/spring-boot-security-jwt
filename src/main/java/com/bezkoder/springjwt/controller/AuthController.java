@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.bezkoder.springjwt.annotation.Loggable;
-import com.bezkoder.springjwt.payload.request.UpdatePasswordRequest;
+import com.bezkoder.springjwt.payload.request.ChangePasswordRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,17 +136,17 @@ public class AuthController {
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<?> passwordChange(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) throws
+    public ResponseEntity<?> passwordChange(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) throws
             Exception {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        if (updatePasswordRequest.getOldPassword().equals(updatePasswordRequest.getNewPassword())) {
+        if (changePasswordRequest.getOldPassword().equals(changePasswordRequest.getNewPassword())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Your new password and the old one is the same please use new one!!!"));
         }
-        if (!userDetails.getUsername().equals(updatePasswordRequest.getUsername())) {
+        if (!userDetails.getUsername().equals(changePasswordRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You are not authorize to changing password for requested username!"));
@@ -155,11 +155,11 @@ public class AuthController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         // Check if the current password matches
-        if (!encoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword())) {
+        if (!encoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
             throw new Exception("Current password is incorrect");
         }
 
-        user.setPassword(encoder.encode(updatePasswordRequest.getNewPassword()));
+        user.setPassword(encoder.encode(changePasswordRequest.getNewPassword()));
         if (((UserDetailsImpl) (authentication).getPrincipal()).isFirstLogin()) {
             user.setFirstLogin(false);
         }

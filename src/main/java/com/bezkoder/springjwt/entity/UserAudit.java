@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDateTime;
 
@@ -17,29 +19,32 @@ public class UserAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
+
+    @Column(nullable = false)
+    private String username;
+
 
     // Relationship to User entity (one-to-many)
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @Column(nullable = false)
     private String actionTimeStamp;
-    @Column(nullable = false)
     private boolean actionResult;
     @Column(nullable = false)
+
     private String ipAddress;
-    @Column(nullable = false)
     private String userAgent;
-    @Column(nullable = false)
     private String deviceInformation;
-    @Column(nullable = false)
     private String location;
     @Column(nullable = false)
+
     private String sessionId;
     @Column(nullable = false)
+
     private String actionDetails;
-//    @Column(nullable = false)
+    //    @Column(nullable = false)
 //    private String oldValue;
 //    @Column(nullable = false)
 //    private String newValue;
@@ -53,6 +58,7 @@ public class UserAudit {
     private String endpoint;
 
     private String requestHeaders;
+    @Column(nullable = false)
 
     private String requestBody;
 
@@ -67,16 +73,16 @@ public class UserAudit {
 
     // Getters and Setters omitted for brevity
 
-    public UserAudit(User user, String actionTimeStamp, boolean actionResult,
-                     String ipAddress, String userAgent, String deviceInformation){
-        this.user=user;
-        this.actionResult=actionResult;
-        this.actionTimeStamp=actionTimeStamp;
-        this.ipAddress=ipAddress;
-        this.userAgent=userAgent;
-        this.deviceInformation=deviceInformation;
-
-    }
+//    public UserAudit(String username, String actionTimeStamp, boolean actionResult,
+//                     String ipAddress, String userAgent, String deviceInformation) {
+//        this.username = username;
+//        this.actionResult = actionResult;
+//        this.actionTimeStamp = actionTimeStamp;
+//        this.ipAddress = ipAddress;
+//        this.userAgent = userAgent;
+//        this.deviceInformation = deviceInformation;
+//
+//    }
 
     @Override
     public String toString() {

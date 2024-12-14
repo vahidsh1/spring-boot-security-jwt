@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.config;
 
+import com.bezkoder.springjwt.filter.AuditFilter;
 import com.bezkoder.springjwt.filter.RestAccessDeniedHandler;
 import com.bezkoder.springjwt.filter.RestAuthenticationFailureHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +52,12 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
     @Bean
+    public AuditFilter auditFilter() throws Exception {
+        return new AuditFilter();
+    }
+    @Bean
+
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
     }
@@ -83,6 +88,7 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
 
             http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(auditFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
 
     }
