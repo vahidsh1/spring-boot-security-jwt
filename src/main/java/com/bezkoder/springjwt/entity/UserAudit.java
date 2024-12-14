@@ -19,38 +19,25 @@ public class UserAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
-
     @Column(nullable = false)
     private String username;
-
-
     // Relationship to User entity (one-to-many)
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
     private String actionTimeStamp;
     private boolean actionResult;
-    @Column(nullable = false)
 
     private String ipAddress;
     private String userAgent;
     private String deviceInformation;
     private String location;
-    @Column(nullable = false)
 
     private String sessionId;
-    @Column(nullable = false)
 
     private String actionDetails;
-    //    @Column(nullable = false)
-//    private String oldValue;
-//    @Column(nullable = false)
-//    private String newValue;
-//    @Column(nullable = false)
-//    private String reasonForAction;
-//
+
     private String message;
 
     private String apiMethod;
@@ -58,7 +45,6 @@ public class UserAudit {
     private String endpoint;
 
     private String requestHeaders;
-    @Column(nullable = false)
 
     private String requestBody;
 
@@ -70,19 +56,6 @@ public class UserAudit {
 
     private String authenticationMethod;
     private String errorMessage;
-
-    // Getters and Setters omitted for brevity
-
-//    public UserAudit(String username, String actionTimeStamp, boolean actionResult,
-//                     String ipAddress, String userAgent, String deviceInformation) {
-//        this.username = username;
-//        this.actionResult = actionResult;
-//        this.actionTimeStamp = actionTimeStamp;
-//        this.ipAddress = ipAddress;
-//        this.userAgent = userAgent;
-//        this.deviceInformation = deviceInformation;
-//
-//    }
 
     @Override
     public String toString() {
@@ -97,10 +70,6 @@ public class UserAudit {
                 ", location='" + location + '\'' +
                 ", sessionId='" + sessionId + '\'' +
                 ", actionDetails='" + actionDetails + '\'' +
-//                ", oldValue='" + oldValue + '\'' +
-//                ", newValue='" + newValue + '\'' +
-//                ", reasonForAction='" + reasonForAction + '\'' +
                 '}';
     }
-// Getters and setters
 }

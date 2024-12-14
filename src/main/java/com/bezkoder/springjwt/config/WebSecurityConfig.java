@@ -1,8 +1,7 @@
 package com.bezkoder.springjwt.config;
 
 import com.bezkoder.springjwt.filter.AuditFilter;
-import com.bezkoder.springjwt.filter.RestAccessDeniedHandler;
-import com.bezkoder.springjwt.filter.RestAuthenticationFailureHandler;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.bezkoder.springjwt.security.jwt.AuthEntryPointJwt;
@@ -52,10 +52,12 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+
     @Bean
     public AuditFilter auditFilter() throws Exception {
         return new AuditFilter();
     }
+
     @Bean
 
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -71,10 +73,7 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers("/h2-console/**");
     }
-//    @Bean
-//    WebSecurityCustomizer debugSecurity() {
-//        return (web) -> web.debug(true);
-//    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
@@ -84,23 +83,10 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
                         auth -> auth.requestMatchers("/api/auth/login").permitAll()
                                 .requestMatchers("/api/auth/signup").hasRole("ADMIN")
                                 .anyRequest().authenticated()
-                );
-
-            http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterAfter(auditFilter(), UsernamePasswordAuthenticationFilter.class);
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(auditFilter(), AuthorizationFilter.class);
         return http.build();
-
     }
-
-    @Bean
-    RestAccessDeniedHandler accessDeniedHandler() {
-        return new RestAccessDeniedHandler();
-    }
-
-    @Bean
-    RestAuthenticationFailureHandler authenticationFailureHandler() {
-        return new RestAuthenticationFailureHandler();
-    }
-
 }
