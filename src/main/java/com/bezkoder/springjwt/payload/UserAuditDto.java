@@ -1,6 +1,7 @@
 package com.bezkoder.springjwt.payload;
 
-import com.bezkoder.springjwt.entity.User;
+import com.bezkoder.springjwt.entity.UserEntity;
+import com.bezkoder.springjwt.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +20,7 @@ public class UserAuditDto {
     // Relationship to User entity (one-to-many)
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserEntity user;
     @Column(nullable = false)
     private String actionTimestamp;
     @Column(nullable = false)

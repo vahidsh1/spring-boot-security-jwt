@@ -1,7 +1,8 @@
 package com.bezkoder.springjwt.config;
 
-import com.bezkoder.springjwt.filter.AuditFilter;
+import com.bezkoder.springjwt.filter.ApiLoggingFilter;
 
+import com.bezkoder.springjwt.filter.CustomAuthenticationFailureHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,11 +34,12 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
     @Autowired
-    private CustomAuthenticationSuccessHandler successHandler;
+    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     @Autowired
     private AuthEntryPointJwt authEntryPointJwt;
-    @Autowired
-    CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    //    @Autowired
+//    CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -53,15 +55,21 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
         return authConfig.getAuthenticationManager();
     }
 
-    @Bean
-    public AuditFilter auditFilter() throws Exception {
-        return new AuditFilter();
-    }
+//    @Bean
+//    public AuditFilter auditFilter() throws Exception {
+//        return new AuditFilter();
+//    }
 
     @Bean
 
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
+    }
+
+    @Bean
+
+    public ApiLoggingFilter apiLoggingFilter() {
+        return new ApiLoggingFilter();
     }
 
     @Bean
@@ -82,11 +90,12 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
                 .authorizeHttpRequests(
                         auth -> auth.requestMatchers("/api/auth/login").permitAll()
                                 .requestMatchers("/api/auth/signup").hasRole("ADMIN")
+                                .requestMatchers("/h2-console/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(auditFilter(), AuthorizationFilter.class);
+                .addFilterAfter(apiLoggingFilter(), AuthorizationFilter.class);
         return http.build();
     }
 }

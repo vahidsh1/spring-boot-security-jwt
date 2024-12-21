@@ -1,6 +1,7 @@
 package com.bezkoder.springjwt.payload.request;
 
-import com.bezkoder.springjwt.entity.User;
+import com.bezkoder.springjwt.entity.UserEntity;
+import com.bezkoder.springjwt.entity.UserEntity;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -16,9 +17,9 @@ public class PasswordResetToken {
 
     private String token;
 
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
+    @OneToOne(targetEntity = UserEntity.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
-    private User user;
+    private UserEntity user;
 
     private Date expiryDate;
 }

@@ -7,7 +7,8 @@ import java.util.regex.Pattern;
 
 import com.bezkoder.springjwt.entity.ERole;
 import com.bezkoder.springjwt.entity.Role;
-import com.bezkoder.springjwt.entity.User;
+import com.bezkoder.springjwt.entity.UserEntity;
+import com.bezkoder.springjwt.entity.UserEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +38,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
         // get the user from the bearer token
 //         Long userId = getUserIdByAccessToken(accessToken);
 
-        User currentUser = new User();
+        UserEntity currentUser = new UserEntity();
         currentUser.setUsername("czetsuyatech.com");
 //        currentUser.setRoles(new HashSet<>(Arrays.asList()));
 

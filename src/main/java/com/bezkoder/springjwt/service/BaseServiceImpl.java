@@ -3,7 +3,8 @@ package com.bezkoder.springjwt.service;
 import com.bezkoder.springjwt.annotation.Loggable;
 import com.bezkoder.springjwt.entity.ERole;
 import com.bezkoder.springjwt.entity.Role;
-import com.bezkoder.springjwt.entity.User;
+import com.bezkoder.springjwt.entity.UserEntity;
+import com.bezkoder.springjwt.entity.UserEntity;
 import com.bezkoder.springjwt.payload.request.ChangePasswordRequest;
 import com.bezkoder.springjwt.payload.request.LoginRequest;
 import com.bezkoder.springjwt.payload.request.SignupRequest;
@@ -105,7 +106,7 @@ public class BaseServiceImpl implements BaseService {
             });
         }
         // Create new user's account
-        User user = new User(signUpRequest.getUsername(),
+        UserEntity user = new UserEntity(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()), true, roles);
         userRepository.save(user);
@@ -128,7 +129,7 @@ public class BaseServiceImpl implements BaseService {
         }
 
         // Find the user by username or throw an exception if not found
-        User user = userRepository.findByUsername(userDetails.getUsername())
+        UserEntity user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         // Check if the current password matches
         if (!encoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {

@@ -1,7 +1,8 @@
 package com.bezkoder.springjwt.mapper;
 
 import com.bezkoder.springjwt.entity.Role;
-import com.bezkoder.springjwt.entity.User;
+import com.bezkoder.springjwt.entity.UserEntity;
+import com.bezkoder.springjwt.entity.UserEntity;
 import com.bezkoder.springjwt.payload.UserDto;
 
 import org.springframework.stereotype.Service;
@@ -13,12 +14,12 @@ import java.util.stream.Collectors;
 public class UserMapperImpl implements UserMapper {
 
     @Override
-    public UserDto toUserDto(User user) {
-        if (user == null) {
+    public UserDto toUserDto(UserEntity userEntity) {
+        if (userEntity == null) {
             return null;
         }
-        Set<Role> roles = user.getRoles().stream().collect(Collectors.toSet());
-        return new UserDto(user.getId(), user.getUsername(), user.getEmail(), user.getPassword(), user.isFirstLogin(),roles);
+        Set<Role> roles = userEntity.getRoles().stream().collect(Collectors.toSet());
+        return new UserDto(userEntity.getId(), userEntity.getUsername(), userEntity.getEmail(), userEntity.getPassword(), userEntity.isFirstLogin(),roles);
     }
 
 }
