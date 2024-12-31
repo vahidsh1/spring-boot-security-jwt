@@ -1,39 +1,33 @@
 package com.bezkoder.springjwt.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.validator.constraints.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Getter
-@Setter
-@Table(name = "user_audit_requests")
 public class UserAuditRequest {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long requestId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String endpoint;
-    private String httpMethod;
-
-    @Column(columnDefinition = "TEXT")
-    private String parameters;
-
-    private String ipAddress;
-    private int clientPort;
-    private String jwtToken;
-    private String sessionId;
+    private String method;
     private LocalDateTime timestamp;
-
-    // Many requests can be associated with one user
+    private String requestBody;
+    // Relationship to User entity (one-to-many)
     @ManyToOne
-    @JoinColumn(name = "users")
-    private UserEntity userEntity;
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
-    // One-to-one relationship with the response
-    @OneToOne(mappedBy = "request", cascade = CascadeType.ALL)
-    private UserAuditResponse response;
+    public UserAuditRequest( UserEntity user) {
+        this.user = user;
+    }
+
 }

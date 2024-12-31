@@ -35,8 +35,8 @@ import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
 public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
-    @Autowired
-    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+//    @Autowired
+//    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     @Autowired
     private AuthEntryPointJwt authEntryPointJwt;
     //    @Autowired
