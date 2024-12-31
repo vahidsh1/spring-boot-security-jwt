@@ -1,35 +1,34 @@
 package com.bezkoder.springjwt.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@Getter
+@Setter
+@Table(name = "user_audit_responses")
 public class UserAuditResponse {
 
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long responseId;
 
     @OneToOne
-    @JoinColumn(name = "request_id", unique = true) // Ensure unique request_id for one-to-one mapping
-    private UserAuditRequest userAuditRequest;
+    @JoinColumn(name = "request_id")
+    private UserAuditRequest request;
 
-    public UserAuditResponse(UserAuditRequest userAuditRequest) {
-        this.userAuditRequest = userAuditRequest;
-    }
+    private int statusCode;
 
-    private String status; // e.g., SUCCESS, FAILURE
-    private String message; // Response message
+    @Column(columnDefinition = "TEXT")
+    private String responseBody;
+
+    @Column(columnDefinition = "TEXT")
+    private String errorMessage;
+
+    private String jwtToken;
     private LocalDateTime timestamp;
 }
-
 

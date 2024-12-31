@@ -3,6 +3,7 @@ package com.bezkoder.springjwt.config;
 import com.bezkoder.springjwt.filter.ApiLoggingFilter;
 
 import com.bezkoder.springjwt.filter.CustomAuthenticationFailureHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -51,6 +53,14 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     }
 
     @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("Access Denied!");
+        };
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
@@ -79,23 +89,31 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/h2-console/**");
+        return (web) -> web.ignoring()
+                .requestMatchers("/favicon.ico", "/css/**", "/js/**")
+                .requestMatchers("/h2-console/**");
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
+                .exceptionHandling(exception -> {
+                    exception.authenticationEntryPoint(authEntryPointJwt);
+                    exception.accessDeniedHandler(accessDeniedHandler());
+                })
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth -> auth.requestMatchers("/api/auth/login").permitAll()
                                 .requestMatchers("/api/auth/signup").hasRole("ADMIN")
-                                .requestMatchers("/h2-console/**").permitAll()
+                                .requestMatchers("/h2-console/**", "/favicon.ico", "/error").permitAll()  // Allow access to H2 and error pages
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(apiLoggingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(apiLoggingFilter(), AuthorizationFilter.class);
+//                .addFilterAfter(apiLoggingFilter(), AuthorizationFilter.class)
+        ;
         return http.build();
     }
 }
