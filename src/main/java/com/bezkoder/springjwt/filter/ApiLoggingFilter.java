@@ -220,14 +220,14 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
     private UserAuditRequest saveRequest(HttpServletRequest request) {
         UserAuditRequest userAuditRequest = new UserAuditRequest();
         userAuditRequest.setEndpoint(request.getRequestURI());
-        userAuditRequest.setHttpMethod(request.getMethod());
-        userAuditRequest.setIpAddress(request.getRemoteAddr());
-        userAuditRequest.setClientPort(request.getRemotePort());
+        userAuditRequest.setMethod(request.getMethod());
+        userAuditRequest.setEndpoint(request.getRemoteAddr());
+//        userAuditRequest.setClientPort(request.getRemotePort());
         userAuditRequest.setTimestamp(LocalDateTime.now());
 
         // Capture session ID and JWT if present
-        userAuditRequest.setSessionId(request.getRequestedSessionId());
-        userAuditRequest.setJwtToken(extractJwtFromRequest(request));
+//        userAuditRequest.setSessionId(request.getRequestedSessionId());
+//        userAuditRequest.setJwtToken(extractJwtFromRequest(request));
 
         // Link request to authenticated user
         var auth = SecurityContextHolder.getContext().getAuthentication();
@@ -236,7 +236,7 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
             if (principal instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) principal;
                 UserEntity userEntity = findOrCreateUser(userDetails.getUsername());
-                userAuditRequest.setUserEntity(userEntity);
+                userAuditRequest.setUser(userEntity);
             }
         }
 
@@ -249,7 +249,7 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
         responseLog.setRequest(request);
         responseLog.setStatusCode(response.getStatus());
         responseLog.setTimestamp(LocalDateTime.now());
-        responseLog.setJwtToken(request.getJwtToken());
+//        responseLog.setJwtToken(request.getJwtToken());
 
         if (response.getStatus() >= 400) {
             responseLog.setErrorMessage("Error during processing.");
@@ -266,7 +266,6 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
         return null;
     }
 
-//    private UserEntity findUserByUsername(String username) {
 //        // Simulate finding user from DB
 //        return new UserEntity(); // Replace with actual user lookup logic
 //    }
