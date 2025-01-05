@@ -26,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.bezkoder.springjwt.security.jwt.AuthEntryPointJwt;
 import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
+import org.springframework.security.web.session.SessionManagementFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -76,11 +77,14 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
         return new AuthTokenFilter();
     }
 
-    @Bean
+    @Autowired
+    private ApiLoggingFilter apiLoggingFilter;  // Let Spring manage the filter
 
-    public ApiLoggingFilter apiLoggingFilter() {
-        return new ApiLoggingFilter();
-    }
+//    @Bean
+//
+//    public ApiLoggingFilter apiLoggingFilter() {
+//        return new ApiLoggingFilter();
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -110,8 +114,9 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(apiLoggingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(apiLoggingFilter, SessionManagementFilter.class)
+
 //                .addFilterAfter(apiLoggingFilter(), AuthorizationFilter.class)
         ;
         return http.build();

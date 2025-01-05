@@ -18,7 +18,9 @@ public class UserAuditRequest {
     private Long id;
 
     private String endpoint;
+    private String IpAddress;
     private String method;
+    private String username;
     private LocalDateTime timestamp;
     private String requestBody;
     // Relationship to User entity (one-to-many)

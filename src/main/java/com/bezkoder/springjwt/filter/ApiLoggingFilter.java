@@ -123,28 +123,30 @@ package com.bezkoder.springjwt.filter;
 //    }
 //}
 
+
 import com.bezkoder.springjwt.entity.UserAuditRequest;
 import com.bezkoder.springjwt.entity.UserAuditResponse;
 import com.bezkoder.springjwt.entity.UserEntity;
 import com.bezkoder.springjwt.repository.UserAuditRequestRepository;
 import com.bezkoder.springjwt.repository.UserAuditResponseRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -152,127 +154,141 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+
+
+
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+
+
 @Component
 public class ApiLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiLoggingFilter.class);
-    @Autowired
-    private UserAuditRequestRepository userAuditRequestRepository;
+
+    private final UserAuditRequestRepository userAuditRequestRepository;
+    private final UserAuditResponseRepository userAuditResponseRepository;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    private UserAuditResponseRepository userAuditResponseRepository;
-    @Autowired
-    private UserRepository userRepository;
+    public ApiLoggingFilter(UserAuditRequestRepository userAuditRequestRepository,
+                            UserAuditResponseRepository userAuditResponseRepository,
+                            UserRepository userRepository) {
+        this.userAuditRequestRepository = userAuditRequestRepository;
+        this.userAuditResponseRepository = userAuditResponseRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException {
+
         if (request.getRequestURI().startsWith("/h2-console")) {
-            filterChain.doFilter(request, response); // Proceed without auditing
+            filterChain.doFilter(request, response);
             return;
         }
-        // Log Incoming Request
-        UserAuditRequest auditRequest = saveRequest(request);
+
+        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
+        ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
         long startTime = System.currentTimeMillis();
         String username = "ANONYMOUS";
+        String jwtToken = extractJwtFromRequest(request);
 
         try {
-            // Log request details
-            logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
-            filterChain.doFilter(request, response);
-        } catch (InsufficientAuthenticationException e) {
-            logger.error("Authentication failed: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Authentication failed: " + e.getMessage());
-        } catch (Exception ex) {
-            logger.error("Unexpected error: {}", ex.getMessage());
-            throw ex;
+            filterChain.doFilter(wrappedRequest, wrappedResponse);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails) {
+                username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            }
+
+            UserAuditRequest auditRequest = saveRequest(wrappedRequest, username);
+            saveResponse(wrappedResponse, auditRequest, username, jwtToken);
+
             logger.info("Request: {} {} - User: {} - Status: {} - Duration: {} ms",
-                    request.getMethod(), request.getRequestURI(), username, response.getStatus(), duration);
+                    wrappedRequest.getMethod(), wrappedRequest.getRequestURI(), username, wrappedResponse.getStatus(), duration);
+
+            wrappedResponse.copyBodyToResponse();  // Ensure response is flushed
         }
-
-        // Log Outgoing Response
-        saveResponse(response, auditRequest);
     }
 
-    private void handleException(HttpServletResponse response, int status, String message) throws IOException {
-        response.setStatus(status);
-        response.setContentType("application/json");
-
-        Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("error", message);
-        errorDetails.put("timestamp", System.currentTimeMillis());
-        errorDetails.put("status", status);
-
-        response.getWriter().write(objectMapper.writeValueAsString(errorDetails));
-
-
-
-
-    }
-
-    private UserAuditRequest saveRequest(HttpServletRequest request) {
+    private UserAuditRequest saveRequest(ContentCachingRequestWrapper request, String username) {
         UserAuditRequest userAuditRequest = new UserAuditRequest();
         userAuditRequest.setEndpoint(request.getRequestURI());
         userAuditRequest.setMethod(request.getMethod());
-        userAuditRequest.setEndpoint(request.getRemoteAddr());
-//        userAuditRequest.setClientPort(request.getRemotePort());
+        userAuditRequest.setIpAddress(request.getRemoteAddr());
         userAuditRequest.setTimestamp(LocalDateTime.now());
 
-        // Capture session ID and JWT if present
-//        userAuditRequest.setSessionId(request.getRequestedSessionId());
-//        userAuditRequest.setJwtToken(extractJwtFromRequest(request));
+        // Extract request body
+        String requestBody = extractRequestBody(request);
+        userAuditRequest.setRequestBody(requestBody);
 
-        // Link request to authenticated user
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated()) {
-            Object principal = auth.getPrincipal();
-            if (principal instanceof UserDetails) {
-                UserDetails userDetails = (UserDetails) principal;
-                UserEntity userEntity = findOrCreateUser(userDetails.getUsername());
-                userAuditRequest.setUser(userEntity);
-            }
+        if (!username.equals("ANONYMOUS")) {
+            UserEntity userEntity = findOrCreateUser(username);
+            userAuditRequest.setUser(userEntity);
         }
 
         userAuditRequestRepository.save(userAuditRequest);
         return userAuditRequest;
     }
 
-    private void saveResponse(HttpServletResponse response, UserAuditRequest request) {
+    private void saveResponse(ContentCachingResponseWrapper response, UserAuditRequest request, String username, String jwtToken) {
         UserAuditResponse responseLog = new UserAuditResponse();
         responseLog.setRequest(request);
         responseLog.setStatusCode(response.getStatus());
         responseLog.setTimestamp(LocalDateTime.now());
-//        responseLog.setJwtToken(request.getJwtToken());
+        responseLog.setJwtToken(jwtToken);
+
+        // Extract response body
+        String responseBody = extractResponseBody(response);
+        responseLog.setResponseBody(responseBody);
 
         if (response.getStatus() >= 400) {
             responseLog.setErrorMessage("Error during processing.");
         }
 
+        if (!username.equals("ANONYMOUS")) {
+            UserEntity userEntity = findOrCreateUser(username);
+//            responseLog.se(userEntity);
+        }
+
         userAuditResponseRepository.save(responseLog);
+    }
+
+    private String extractRequestBody(ContentCachingRequestWrapper request) {
+        byte[] contentAsByteArray = request.getContentAsByteArray();
+        return (contentAsByteArray.length > 0)
+                ? new String(contentAsByteArray, StandardCharsets.UTF_8)
+                : "";
+    }
+
+    private String extractResponseBody(ContentCachingResponseWrapper response) {
+        byte[] contentAsByteArray = response.getContentAsByteArray();
+        return (contentAsByteArray.length > 0)
+                ? new String(contentAsByteArray, StandardCharsets.UTF_8)
+                : "";
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); // Remove "Bearer " prefix
+            return bearerToken.substring(7);
         }
         return null;
     }
 
-//        // Simulate finding user from DB
-//        return new UserEntity(); // Replace with actual user lookup logic
-//    }
-
     private UserEntity findOrCreateUser(String username) {
         Optional<UserEntity> userEntity = userRepository.findByUsername(username);
-        userEntity.ifPresent(user -> user.setUsername(username));
-        return userEntity.orElse(new UserEntity());
+        return userEntity.orElseGet(() -> {
+            UserEntity newUser = new UserEntity();
+            newUser.setUsername(username);
+            return userRepository.save(newUser);
+        });
     }
 }
