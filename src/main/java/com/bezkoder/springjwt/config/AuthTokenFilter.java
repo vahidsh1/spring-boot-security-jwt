@@ -20,6 +20,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
 
+import javax.security.sasl.AuthenticationException;
+
 public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
