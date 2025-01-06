@@ -84,9 +84,8 @@ public class AuthController {
                     .body(ApiResponse.error(HttpStatus.UNAUTHORIZED, ResponseCode.UNAUTHORIZED));
         }
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ResponseCode.USERNAME_ALREADY_EXISTS));
         }
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

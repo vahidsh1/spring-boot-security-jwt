@@ -23,6 +23,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Component
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
@@ -78,6 +79,9 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         } else if (authException instanceof LockedException) {
             status = HttpServletResponse.SC_UNAUTHORIZED;
             errorMessage = "Account is locked";
+        } else if (authException instanceof InsufficientAuthenticationException) {
+            status = HttpServletResponse.SC_UNAUTHORIZED;
+            errorMessage = "Not Authorized";
         } else {
             status = HttpServletResponse.SC_UNAUTHORIZED;
             errorMessage = "Unauthorized";
