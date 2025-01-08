@@ -1,6 +1,7 @@
 package com.bezkoder.springjwt.security.jwt;
 
 import java.security.Key;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -51,13 +52,16 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String getUserNameFromJwtToken(String token) {
-        return Jwts.parserBuilder()
+    public String getUserNameFromJwtToken(String token) throws ParseException {
+       try{ return Jwts.parserBuilder()
                 .setSigningKey(key())
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject();
+                .getSubject();}
+       catch (Exception e) {
+           throw new ParseException("Could not extract user name from token",2);
+       }
     }
 
     public boolean validateJwtToken(String authToken) {

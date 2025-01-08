@@ -53,41 +53,13 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
                 status = HttpServletResponse.SC_UNAUTHORIZED;
                 errorMessage = "JWT token validation failed";
             }
-        }
-        // Authentication Exceptions
-        else if (authException instanceof UsernameNotFoundException) {
-            status = HttpServletResponse.SC_NOT_FOUND;
-            errorMessage = "User not found";
-        } else if (authException instanceof BadCredentialsException) {
-            status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "Invalid username or password";
-        } else if (authException instanceof AccountExpiredException) {
-            status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "Account is expired";
-        } else if (authException instanceof AuthenticationCredentialsNotFoundException) {
-            status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "User not found";
-        } else if (authException instanceof CredentialsExpiredException) {
-            status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "Password is expired";
-        } else if (authException instanceof DisabledException) {
-            status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "Account is disabled";
-        } else if (authException instanceof InternalAuthenticationServiceException) {
-            status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "Invalid username or password";
-        } else if (authException instanceof LockedException) {
-            status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "Account is locked";
-        } else if (authException instanceof InsufficientAuthenticationException) {
-            status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "Not Authorized";
         } else {
             status = HttpServletResponse.SC_UNAUTHORIZED;
-            errorMessage = "Unauthorized";
+            errorMessage = authException.getMessage();
         }
 
         response.setStatus(status);
         response.getWriter().write(errorMessage);
     }
+
 }

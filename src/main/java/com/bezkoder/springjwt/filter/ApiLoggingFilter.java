@@ -141,38 +141,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-
-
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-
-
-
-
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-
 
 @Component
 public class ApiLoggingFilter extends OncePerRequestFilter {
-
     private static final Logger logger = LoggerFactory.getLogger(ApiLoggingFilter.class);
-
     private final UserAuditRequestRepository userAuditRequestRepository;
     private final UserAuditResponseRepository userAuditResponseRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
     public ApiLoggingFilter(UserAuditRequestRepository userAuditRequestRepository,
                             UserAuditResponseRepository userAuditResponseRepository,
                             UserRepository userRepository) {
@@ -180,7 +164,6 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
         this.userAuditResponseRepository = userAuditResponseRepository;
         this.userRepository = userRepository;
     }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -193,7 +176,6 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
-
         long startTime = System.currentTimeMillis();
         String username = "ANONYMOUS";
         String jwtToken = extractJwtFromRequest(request);
@@ -243,15 +225,14 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
         responseLog.setRequest(request);
         responseLog.setStatusCode(response.getStatus());
         responseLog.setTimestamp(LocalDateTime.now());
-        responseLog.setJwtToken(jwtToken);
+//        responseLog.setJwtToken(jwtToken);
 
         // Extract response body
         String responseBody = extractResponseBody(response);
         responseLog.setResponseBody(responseBody);
 
-        if (response.getStatus() >= 400) {
-            responseLog.setErrorMessage("Error during processing.");
-        }
+//            responseLog.setReasonCode(response.getStatus());
+
 
         if (!username.equals("ANONYMOUS")) {
             UserEntity userEntity = findOrCreateUser(username);

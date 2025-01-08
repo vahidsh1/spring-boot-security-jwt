@@ -28,7 +28,8 @@ public enum ResponseCode {
 
     // Server Errors (5000 series)
     INTERNAL_SERVER_ERROR("5000", "Internal server error"),
-    SERVICE_UNAVAILABLE("5001", "Service temporarily unavailable");
+    SERVICE_UNAVAILABLE("5001", "Service temporarily unavailable"),
+    ACCESS_DENIED("5002", "You dont have permission");
 
     private final String code;
     private final String message;

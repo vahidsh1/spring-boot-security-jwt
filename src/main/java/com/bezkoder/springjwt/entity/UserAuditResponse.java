@@ -24,11 +24,9 @@ public class UserAuditResponse {
 
     @Column(columnDefinition = "TEXT")
     private String responseBody;
-
-    @Column(columnDefinition = "TEXT")
-    private String errorMessage;
-
-    private String jwtToken;
+//    @Column(columnDefinition = "TEXT")
+//    private int reasonCode;
+//    private String jwtToken;
     private LocalDateTime timestamp;
 }
 

@@ -3,7 +3,8 @@ package com.bezkoder.springjwt.config;
 import com.bezkoder.springjwt.exception.GlobalExceptionHandler;
 import com.bezkoder.springjwt.filter.ApiLoggingFilter;
 
-import com.bezkoder.springjwt.filter.CustomAuthenticationFailureHandler;
+import com.bezkoder.springjwt.filter.GlobalExceptionHandlerFilter;
+import com.bezkoder.springjwt.handler.CustomAccessDeniedHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +17,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -33,6 +35,8 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
 @EnableMethodSecurity
+@EnableWebSecurity
+
 // (securedEnabled = true,
 // jsr250Enabled = true,
 // prePostEnabled = true) // by default
@@ -48,6 +52,7 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     public AuthTokenFilter authTokenFilter() {
         return new AuthTokenFilter();
     }
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -61,6 +66,7 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -69,11 +75,11 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/favicon.ico", "/css/**", "/js/**")
+                .requestMatchers("/favicon.ico", "/css/**", "/js/**", "/error/**", "/error")
                 .requestMatchers("/h2-console/**");
     }
 
-//    @Bean
+    //    @Bean
 //    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 //        http.csrf(csrf -> csrf.disable())
 //                .exceptionHandling(exception -> {
@@ -96,22 +102,23 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
 //        ;
 //        return http.build();
 //    }
-@Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/auth/login").permitAll()
-                    .requestMatchers("/api/auth/signup").hasRole("ADMIN")
-                    .requestMatchers("/h2-console/**", "/favicon.ico", "/error").permitAll()  // Allow access to H2 and error pages
-                    .anyRequest().authenticated()
-            );
-    http.authenticationProvider(authenticationProvider());
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/auth/signup").hasRole("ADMIN")
+                        .requestMatchers("/h2-console/**", "/favicon.ico").permitAll()  // Allow access to H2 and error pages
+                        .anyRequest().authenticated()
+                );
+        http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(apiLoggingFilter, UsernamePasswordAuthenticationFilter.class);  // Logging filter
+        http.addFilterBefore(new GlobalExceptionHandlerFilter(), AuthorizationFilter.class);  // Logging filter
 
-    http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(apiLoggingFilter, UsernamePasswordAuthenticationFilter.class);  // Logging filter
-
-    return http.build();
-}
+        return http.build();
+    }
 }
