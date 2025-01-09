@@ -165,9 +165,9 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
         this.userRepository = userRepository;
     }
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    public void doFilterInternal(HttpServletRequest request,
+                                 HttpServletResponse response,
+                                 FilterChain filterChain) throws ServletException, IOException {
 
         if (request.getRequestURI().startsWith("/h2-console")) {
             filterChain.doFilter(request, response);

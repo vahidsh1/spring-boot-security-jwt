@@ -8,6 +8,11 @@ public class LoginRequest {
     @NotBlank(message = "Password must not be empty")
     private String password;
 
+    public LoginRequest(String user, String password) {
+        this.username = user;
+        this.password = password;
+    }
+
     public String getUsername() {
         return username;
     }

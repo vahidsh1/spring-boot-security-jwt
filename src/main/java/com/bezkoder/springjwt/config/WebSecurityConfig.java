@@ -1,6 +1,5 @@
 package com.bezkoder.springjwt.config;
 
-import com.bezkoder.springjwt.exception.GlobalExceptionHandler;
 import com.bezkoder.springjwt.filter.ApiLoggingFilter;
 
 import com.bezkoder.springjwt.filter.GlobalExceptionHandlerFilter;
