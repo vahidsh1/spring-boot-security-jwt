@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashSet;
@@ -31,6 +32,8 @@ public class SecurityConfigTest {
     JwtUtils jwtUtils;
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private AuthenticationManager authenticationManager;
     @Mock
     UserRepository userRepository;
 
