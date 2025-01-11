@@ -54,6 +54,10 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
     }
 
     @Bean
+    public FirstLoginFilter firstLoginFilter() {
+        return new FirstLoginFilter();
+    }
+    @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
@@ -118,7 +122,7 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
         http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(apiLoggingFilter, UsernamePasswordAuthenticationFilter.class);  // Logging filter
         http.addFilterBefore(new GlobalExceptionHandlerFilter(), AuthorizationFilter.class);  // Logging filter
-        http.addFilterBefore(new FirstLoginFilter(authenticationManager(new AuthenticationConfiguration())), ApiLoggingFilter.class);  // Logging filter
+        http.addFilterAfter(firstLoginFilter(), UsernamePasswordAuthenticationFilter.class);  // Logging filter
 
         return http.build();
     }

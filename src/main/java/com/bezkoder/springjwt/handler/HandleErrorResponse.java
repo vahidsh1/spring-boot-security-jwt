@@ -9,18 +9,32 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 @Component
 public class HandleErrorResponse {
-    public void handleAuthError(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    //    public void handleAuthError(HttpServletResponse response, String message) throws IOException {
+//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//
+//        Map<String, Object> errorDetails = new HashMap<>();
+//        errorDetails.put("timestamp", System.currentTimeMillis());
+//        errorDetails.put("status", HttpStatus.UNAUTHORIZED.value());
+//        errorDetails.put("error", "Unauthorized");
+//        errorDetails.put("message", message);
+//        errorDetails.put("path", "/");
+//
+//        response.getOutputStream().write(new ObjectMapper().writeValueAsBytes(errorDetails));
+//    }
+    public void handleErrorResponse(HttpServletResponse response, HttpStatus status, String message, String path) throws IOException {
+        response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("timestamp", System.currentTimeMillis());
-        errorDetails.put("status", HttpStatus.UNAUTHORIZED.value());
-        errorDetails.put("error", "Unauthorized");
+        errorDetails.put("status", status.value());
+        errorDetails.put("error", status.getReasonPhrase());
         errorDetails.put("message", message);
-        errorDetails.put("path", "/");
+        errorDetails.put("path", path);
 
         response.getOutputStream().write(new ObjectMapper().writeValueAsBytes(errorDetails));
     }
