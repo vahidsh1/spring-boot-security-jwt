@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.bezkoder.springjwt.annotation.Loggable;
 import com.bezkoder.springjwt.entity.UserEntity;
 import com.bezkoder.springjwt.payload.ResponseCode;
 import com.bezkoder.springjwt.payload.request.ChangePasswordRequest;
 import com.bezkoder.springjwt.payload.response.ApiResponse;
-import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,11 +24,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.bezkoder.springjwt.entity.ERole;
 import com.bezkoder.springjwt.entity.Role;
-import com.bezkoder.springjwt.entity.UserEntity;
 import com.bezkoder.springjwt.payload.request.LoginRequest;
 import com.bezkoder.springjwt.payload.request.SignupRequest;
 import com.bezkoder.springjwt.payload.response.JwtResponse;
-import com.bezkoder.springjwt.payload.response.MessageResponse;
 import com.bezkoder.springjwt.repository.RoleRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
 import com.bezkoder.springjwt.security.jwt.JwtUtils;
@@ -56,7 +52,7 @@ public class AuthController {
     JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    @Loggable
+//    @Loggable
     public ResponseEntity<ApiResponse<Object>> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(

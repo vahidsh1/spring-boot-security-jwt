@@ -1,9 +1,7 @@
 package com.bezkoder.springjwt.service;
 
-import com.bezkoder.springjwt.annotation.Loggable;
 import com.bezkoder.springjwt.entity.ERole;
 import com.bezkoder.springjwt.entity.Role;
-import com.bezkoder.springjwt.entity.UserEntity;
 import com.bezkoder.springjwt.entity.UserEntity;
 import com.bezkoder.springjwt.payload.request.ChangePasswordRequest;
 import com.bezkoder.springjwt.payload.request.LoginRequest;
@@ -42,7 +40,7 @@ public class BaseServiceImpl implements BaseService {
     Authentication authentication;
     @Autowired
     JwtUtils jwtUtils;
-    @Loggable
+//    @Loggable
     public JwtResponse loginUserService(LoginRequest loginRequest) {
          authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -59,7 +57,7 @@ public class BaseServiceImpl implements BaseService {
                 userDetails.isFirstLogin(),
                 roles);
     }
-    @Loggable
+//    @Loggable
 
     public ResponseEntity<?> registerUserService(SignupRequest signUpRequest) {
          authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -112,7 +110,7 @@ public class BaseServiceImpl implements BaseService {
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
-    @Loggable
+//    @Loggable
 
     public ResponseEntity<?> changePasswordService(ChangePasswordRequest changePasswordRequest) throws Exception {
          authentication = SecurityContextHolder.getContext().getAuthentication();
