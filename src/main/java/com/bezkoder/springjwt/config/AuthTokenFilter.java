@@ -2,6 +2,7 @@ package com.bezkoder.springjwt.config;
 
 import com.bezkoder.springjwt.security.jwt.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,14 +49,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
             filterChain.doFilter(request, response);
-
-        } catch (io.jsonwebtoken.JwtException e) {
+        } catch (JwtException | ParseException e) {
             logger.error("Cannot set user authentication: " + e.getMessage());
-            handleAuthError(response, "Invalid or malformed JWT token.");
-        } catch (ParseException e) {
-            logger.error("Cannot set user authentication: " + e.getMessage());
-            handleAuthError(response, "Invalid or malformed JWT token.");
-            throw new RuntimeException(e);
+            handleAuthError(response, e.getMessage());
+            // Stop further filter chain execution
+            return;
         }
     }
 

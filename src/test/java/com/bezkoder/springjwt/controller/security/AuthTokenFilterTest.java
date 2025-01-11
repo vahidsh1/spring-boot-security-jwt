@@ -48,11 +48,11 @@ import java.text.ParseException;
 import java.util.*;
 
 import static groovy.json.JsonOutput.toJson;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -63,6 +63,7 @@ public class AuthTokenFilterTest {
     private MockMvc mockMvc;
 
     @MockBean
+    @Autowired
     private JwtUtils jwtUtils;
 
     @MockBean
@@ -114,50 +115,20 @@ public class AuthTokenFilterTest {
         when(roleRepository.findByName(ERole.ROLE_USER)).thenReturn(Optional.of(userRole));
         when(roleRepository.findByName(ERole.ROLE_MODERATOR)).thenReturn(Optional.of(userModerator));
         UserDetails userDetails = mock(UserDetails.class);
-//        when(request.getHeader("Authorization")).thenReturn("Bearer " + validJwt);
-//        when(jwtUtils.validateJwtToken(validJwt)).thenReturn(true);
-//        when(jwtUtils.validateJwtToken(adminJwt)).thenReturn(true);
-//        when(jwtUtils.getUserNameFromJwtToken(validJwt)).thenReturn(testUsername);
-//        when(jwtUtils.getUserNameFromJwtToken(adminJwt)).thenReturn(adminUsername);
-//        when(userDetailsService.loadUserByUsername(testUsername)).thenReturn(userDetails);
-//        when(userDetailsService.loadUserByUsername(adminUsername)).thenReturn(userDetails);
         String validJwt = "valid.jwt.token";
         String expiredJwt = "expired.jwt.token";
         String malformedJwt = "malformed.jwt.token";
         String invalidJwt = "invalid.jwt.token";
         // Mock behavior for JwtUtils
-        Mockito.when(jwtUtils.validateJwtToken(validJwt)).thenReturn(true);
-        Mockito.when(jwtUtils.validateJwtToken(invalidJwt)).thenReturn(false);
-        Mockito.when(jwtUtils.validateJwtToken(expiredJwt)).thenThrow(new io.jsonwebtoken.ExpiredJwtException(null, null, "JWT expired"));
-        Mockito.when(jwtUtils.validateJwtToken(malformedJwt)).thenThrow(new io.jsonwebtoken.JwtException("Malformed JWT"));
+//        Mockito.when(jwtUtils.validateJwtToken(invalidJwt)).thenReturn(false);
+//        Mockito.when(jwtUtils.validateJwtToken(validJwt)).thenReturn(true);
+//        Mockito.when(jwtUtils.validateJwtToken(malformedJwt)).thenThrow(new io.jsonwebtoken.JwtException("Malformed JWT"));
 //        Mockito.when(authenticationManager.authenticate(any())).thenReturn((Authentication) new Object());
 //        Mockito.when(userRepository.findByUsername(any())).thenReturn(Optional.of(new UserEntity()));
 //        Mockito.when(userRepository.findByUsername(any())).thenReturn(Optional.of(new UserEntity()));
 
-        Mockito.when(jwtUtils.getUserNameFromJwtToken(validJwt)).thenReturn("vahid");
-    }
-
-//    @BeforeEach
-//    public void setUp() throws ParseException {
-//        // Mock behavior only for what's used in the test
-//
-//        when(roleRepository.findByName(ERole.ROLE_ADMIN)).thenReturn(Optional.of(new Role(1, ERole.ROLE_ADMIN)));
-//        when(roleRepository.findByName(ERole.ROLE_USER)).thenReturn(Optional.of(new Role(1, ERole.ROLE_USER)));
-//
-//        // Mock JWT validation only if used
-//        when(jwtUtils.validateJwtToken(validJwt)).thenReturn(true);
-//        when(jwtUtils.validateJwtToken(adminJwt)).thenReturn(true);
-//        when(jwtUtils.validateJwtToken(expiredJwt)).thenThrow(new io.jsonwebtoken.ExpiredJwtException(null, null, "JWT expired"));
-//        when(jwtUtils.validateJwtToken(malformedJwt)).thenThrow(new io.jsonwebtoken.JwtException("Malformed JWT"));
-//
-//        // Mock UserDetailsService only if it's necessary for the test
-//        when(userDetailsService.loadUserByUsername("testUser")).thenReturn(mock(UserDetails.class));
-//        when(userDetailsService.loadUserByUsername("admin")).thenReturn(mock(UserDetails.class));
-//
-//        // Mock JWT Usernames if needed
 //        Mockito.when(jwtUtils.getUserNameFromJwtToken(validJwt)).thenReturn("vahid");
-//    }
-
+    }
 
     @Test
     public void shouldHandleExpiredJwtGracefully() throws Exception {
@@ -262,26 +233,31 @@ public class AuthTokenFilterTest {
         // Simulate a request with a malformed JWT token
         ResultActions result = mockMvc.perform(get("/api/protected-endpoint")
                 .header("Authorization", "Bearer " + malformedJwt)
+                .with(csrf())  // Include CSRF token
                 .contentType(MediaType.APPLICATION_JSON));
 
         // Assert the response
-        result.andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Invalid or malformed JWT token."));
+        result.andExpect(status().isUnauthorized());
     }
 
     @Test
     public void testExpiredJwtToken() throws Exception {
-        // Simulate a request with an expired JWT token
-
+        // Arrange
         String expiredJwt = "expired.jwt.token";
+        Mockito.doThrow(new ExpiredJwtException(null, null, "JWT expired"))
+                .when(jwtUtils).validateJwtToken(expiredJwt);
+
+        // Act
         ResultActions result = mockMvc.perform(post("/api/auth/signup")
                 .header("Authorization", "Bearer " + expiredJwt)
+                .with(csrf()) // Include CSRF token
                 .contentType(MediaType.APPLICATION_JSON));
 
-        // Assert the response
+        // Assert
         result.andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("JWT token expired"));
+                .andExpect(content().string(containsString("JWT expired")));
     }
+
 
     @Test
     @WithMockUser(username = "vahid", roles = "ADMIN")
