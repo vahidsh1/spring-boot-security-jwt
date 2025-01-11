@@ -3,9 +3,11 @@ package com.bezkoder.springjwt.payload.request;
 import java.util.Set;
 
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class SignupRequest {
     @NotBlank(message = "Username must not be empty")
     @Size(min = 3, max = 20)

@@ -1,13 +1,19 @@
 package com.bezkoder.springjwt.controller.security;
 
 import com.bezkoder.springjwt.config.AuthTokenFilter;
+import com.bezkoder.springjwt.entity.ERole;
+import com.bezkoder.springjwt.entity.Role;
+import com.bezkoder.springjwt.entity.UserEntity;
+import com.bezkoder.springjwt.payload.request.SignupRequest;
 import com.bezkoder.springjwt.repository.RoleRepository;
 import com.bezkoder.springjwt.repository.UserAuditRequestRepository;
 import com.bezkoder.springjwt.repository.UserAuditResponseRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
 import com.bezkoder.springjwt.security.jwt.JwtUtils;
 import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
@@ -39,13 +45,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
+import static groovy.json.JsonOutput.toJson;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest
@@ -60,9 +68,11 @@ public class AuthTokenFilterTest {
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
 
-    private String validJwt;
-    private String expiredJwt;
-    private String malformedJwt;
+//    private String validJwt;
+//    private String adminJwt;
+//    private String invalidJwt;
+//    private String expiredJwt;
+//    private String malformedJwt;
 
     @InjectMocks
     private AuthTokenFilter authTokenFilter;
@@ -94,19 +104,60 @@ public class AuthTokenFilterTest {
     @BeforeEach
     public void setUp() throws ParseException {
         // Initialize JWT strings
-        validJwt = "valid.jwt.token";
-        expiredJwt = "expired.jwt.token";
-        malformedJwt = "malformed.jwt.token";
+
+
+        Role adminRole = new Role(1, ERole.ROLE_ADMIN); // Replace ERole.ROLE_ADMIN with your enum or string
+        Role userRole = new Role(1, ERole.ROLE_USER); // Replace ERole.ROLE_ADMIN with your enum or string
+        Role userModerator = new Role(1, ERole.ROLE_MODERATOR); // Replace ERole.ROLE_ADMIN with your enum or string
+        // Mock behavior of roleRepository
+        when(roleRepository.findByName(ERole.ROLE_ADMIN)).thenReturn(Optional.of(adminRole));
+        when(roleRepository.findByName(ERole.ROLE_USER)).thenReturn(Optional.of(userRole));
+        when(roleRepository.findByName(ERole.ROLE_MODERATOR)).thenReturn(Optional.of(userModerator));
+        UserDetails userDetails = mock(UserDetails.class);
+//        when(request.getHeader("Authorization")).thenReturn("Bearer " + validJwt);
+//        when(jwtUtils.validateJwtToken(validJwt)).thenReturn(true);
+//        when(jwtUtils.validateJwtToken(adminJwt)).thenReturn(true);
+//        when(jwtUtils.getUserNameFromJwtToken(validJwt)).thenReturn(testUsername);
+//        when(jwtUtils.getUserNameFromJwtToken(adminJwt)).thenReturn(adminUsername);
+//        when(userDetailsService.loadUserByUsername(testUsername)).thenReturn(userDetails);
+//        when(userDetailsService.loadUserByUsername(adminUsername)).thenReturn(userDetails);
+        String validJwt = "valid.jwt.token";
+        String expiredJwt = "expired.jwt.token";
+        String malformedJwt = "malformed.jwt.token";
+        String invalidJwt = "invalid.jwt.token";
         // Mock behavior for JwtUtils
         Mockito.when(jwtUtils.validateJwtToken(validJwt)).thenReturn(true);
+        Mockito.when(jwtUtils.validateJwtToken(invalidJwt)).thenReturn(false);
         Mockito.when(jwtUtils.validateJwtToken(expiredJwt)).thenThrow(new io.jsonwebtoken.ExpiredJwtException(null, null, "JWT expired"));
         Mockito.when(jwtUtils.validateJwtToken(malformedJwt)).thenThrow(new io.jsonwebtoken.JwtException("Malformed JWT"));
 //        Mockito.when(authenticationManager.authenticate(any())).thenReturn((Authentication) new Object());
 //        Mockito.when(userRepository.findByUsername(any())).thenReturn(Optional.of(new UserEntity()));
 //        Mockito.when(userRepository.findByUsername(any())).thenReturn(Optional.of(new UserEntity()));
 
-        Mockito.when(jwtUtils.getUserNameFromJwtToken(validJwt)).thenReturn("testuser");
+        Mockito.when(jwtUtils.getUserNameFromJwtToken(validJwt)).thenReturn("vahid");
     }
+
+//    @BeforeEach
+//    public void setUp() throws ParseException {
+//        // Mock behavior only for what's used in the test
+//
+//        when(roleRepository.findByName(ERole.ROLE_ADMIN)).thenReturn(Optional.of(new Role(1, ERole.ROLE_ADMIN)));
+//        when(roleRepository.findByName(ERole.ROLE_USER)).thenReturn(Optional.of(new Role(1, ERole.ROLE_USER)));
+//
+//        // Mock JWT validation only if used
+//        when(jwtUtils.validateJwtToken(validJwt)).thenReturn(true);
+//        when(jwtUtils.validateJwtToken(adminJwt)).thenReturn(true);
+//        when(jwtUtils.validateJwtToken(expiredJwt)).thenThrow(new io.jsonwebtoken.ExpiredJwtException(null, null, "JWT expired"));
+//        when(jwtUtils.validateJwtToken(malformedJwt)).thenThrow(new io.jsonwebtoken.JwtException("Malformed JWT"));
+//
+//        // Mock UserDetailsService only if it's necessary for the test
+//        when(userDetailsService.loadUserByUsername("testUser")).thenReturn(mock(UserDetails.class));
+//        when(userDetailsService.loadUserByUsername("admin")).thenReturn(mock(UserDetails.class));
+//
+//        // Mock JWT Usernames if needed
+//        Mockito.when(jwtUtils.getUserNameFromJwtToken(validJwt)).thenReturn("vahid");
+//    }
+
 
     @Test
     public void shouldHandleExpiredJwtGracefully() throws Exception {
@@ -207,6 +258,7 @@ public class AuthTokenFilterTest {
 
     @Test
     public void testMalformedJwtToken() throws Exception {
+        String malformedJwt = "malformed.jwt.token";
         // Simulate a request with a malformed JWT token
         ResultActions result = mockMvc.perform(get("/api/protected-endpoint")
                 .header("Authorization", "Bearer " + malformedJwt)
@@ -220,7 +272,9 @@ public class AuthTokenFilterTest {
     @Test
     public void testExpiredJwtToken() throws Exception {
         // Simulate a request with an expired JWT token
-        ResultActions result = mockMvc.perform(get("/api/protected-endpoint")
+
+        String expiredJwt = "expired.jwt.token";
+        ResultActions result = mockMvc.perform(post("/api/auth/signup")
                 .header("Authorization", "Bearer " + expiredJwt)
                 .contentType(MediaType.APPLICATION_JSON));
 
@@ -230,14 +284,29 @@ public class AuthTokenFilterTest {
     }
 
     @Test
-    @WithMockUser(username = "testuser", roles = {"USER"})
+    @WithMockUser(username = "vahid", roles = "ADMIN")
     public void testValidJwtToken() throws Exception {
-        // Simulate a request with a valid JWT token
-        ResultActions result = mockMvc.perform(get("/api/protected-endpoint")
-                .header("Authorization", "Bearer " + validJwt)
-                .contentType(MediaType.APPLICATION_JSON));
-        // Assert the response
-        result.andExpect(status().isOk());
-    }
-}
+        String validJwt = "valid.jwt.token";
 
+        // Create the SignupRequest object
+        Set<String> roles = new HashSet<>();
+        roles.add("admin");
+        SignupRequest signupRequest = new SignupRequest("hamind", "hamid1@gmail.com", roles, "123456");
+
+        // Serialize the SignupRequest object to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String signupRequestJson = objectMapper.writeValueAsString(signupRequest);
+
+        // Simulate a request with a valid JWT token
+        ResultActions result = mockMvc.perform(post("/api/auth/signup")
+                .header("Authorization", "Bearer " + validJwt) // Add your valid JWT token
+                .with(csrf())  // Include CSRF token
+                .content(signupRequestJson) // Set serialized JSON content
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // Assert the response
+        result.andExpect(status().isCreated()); // Expect status 201 for successful creation
+    }
+
+
+}
