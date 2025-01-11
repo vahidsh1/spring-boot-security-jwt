@@ -88,33 +88,71 @@ public class AuthController {
                     .body(ApiResponse.error(HttpStatus.NOT_FOUND, ResponseCode.USER_NOT_FOUND));
         }
         Set<String> strRoles = signUpRequest.getRole();
+//        Set<Role> roles = new HashSet<>();
+//        if (strRoles == null) {
+//            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+//                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+//            roles.add(userRole);
+//            return ResponseEntity.status(HttpStatus.CREATED)
+//                    .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ResponseCode.ROLE_NOT_FOUND));
+//        } else {
+//            strRoles.forEach(role -> {
+//                switch (role) {
+//                    case "admin":
+//                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+//
+//                        roles.add(adminRole);
+//
+//                        break;
+//                    case "mod":
+//                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+//
+//                        roles.add(modRole);
+//
+//                        break;
+//                    default:
+//                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+//                        roles.add(userRole);
+//                }
+//            });
         Set<Role> roles = new HashSet<>();
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
 
+        if (strRoles == null || strRoles.isEmpty()) {
+            // Handle case where no roles are provided
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ResponseCode.ROLE_NOT_FOUND));
+        }
+
+        for (String role : strRoles) {
+            try {
+                Role fetchedRole;
+                switch (role.toLowerCase()) {
+                    case "admin":
+                        fetchedRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         break;
                     case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+                        fetchedRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
+                        break;
+                    case "user":
+                        fetchedRole = roleRepository.findByName(ERole.ROLE_USER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         break;
                     default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ResponseCode.ROLE_NOT_FOUND));
                 }
-            });
+                roles.add(fetchedRole);
+            } catch (RuntimeException ex) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ResponseCode.ROLE_NOT_FOUND));
+            }
         }
+
         // Create new user's account
         UserEntity userEntity = new UserEntity(signUpRequest.getUsername(), encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getEmail(), true, roles);
@@ -144,7 +182,9 @@ public class AuthController {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         // Check if the current password matches
         if (!encoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
-            throw new Exception("Current password is incorrect");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                    .body(ApiResponse.error(HttpStatus.NOT_ACCEPTABLE, ResponseCode.CURRENT_PASSWORD_MISMATCH));
+//            throw new Exception("Current password is incorrect");
         }
 
         user.setPassword(encoder.encode(changePasswordRequest.getNewPassword()));

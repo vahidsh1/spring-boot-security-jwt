@@ -29,7 +29,9 @@ public enum ResponseCode {
     // Server Errors (5000 series)
     INTERNAL_SERVER_ERROR("5000", "Internal server error"),
     SERVICE_UNAVAILABLE("5001", "Service temporarily unavailable"),
-    ACCESS_DENIED("5002", "You dont have permission");
+    ACCESS_DENIED("5002", "You dont have permission"),
+    CURRENT_PASSWORD_MISMATCH("5003", "Current password in not correct"),
+    ROLE_NOT_FOUND("5004", "The roles you entered are not valid !!! ");
 
     private final String code;
     private final String message;
