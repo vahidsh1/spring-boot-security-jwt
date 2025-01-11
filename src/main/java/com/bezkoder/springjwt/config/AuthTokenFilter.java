@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.config;
 
+import com.bezkoder.springjwt.handler.HandleErrorResponse;
 import com.bezkoder.springjwt.security.jwt.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
@@ -23,7 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
-
+    @Autowired
+    HandleErrorResponse handleErrorResponse;
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -51,25 +53,25 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (JwtException | ParseException e) {
             logger.error("Cannot set user authentication: " + e.getMessage());
-            handleAuthError(response, e.getMessage());
+            handleErrorResponse.handleAuthError(response, e.getMessage());
             // Stop further filter chain execution
             return;
         }
     }
 
-    private void handleAuthError(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("timestamp", System.currentTimeMillis());
-        errorDetails.put("status", HttpStatus.UNAUTHORIZED.value());
-        errorDetails.put("error", "Unauthorized");
-        errorDetails.put("message", message);
-        errorDetails.put("path", "/");
-
-        response.getOutputStream().write(new ObjectMapper().writeValueAsBytes(errorDetails));
-    }
+//    private void handleAuthError(HttpServletResponse response, String message) throws IOException {
+//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//
+//        Map<String, Object> errorDetails = new HashMap<>();
+//        errorDetails.put("timestamp", System.currentTimeMillis());
+//        errorDetails.put("status", HttpStatus.UNAUTHORIZED.value());
+//        errorDetails.put("error", "Unauthorized");
+//        errorDetails.put("message", message);
+//        errorDetails.put("path", "/");
+//
+//        response.getOutputStream().write(new ObjectMapper().writeValueAsBytes(errorDetails));
+//    }
 
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");

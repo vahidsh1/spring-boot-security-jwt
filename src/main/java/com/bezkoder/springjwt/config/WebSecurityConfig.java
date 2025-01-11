@@ -2,6 +2,7 @@ package com.bezkoder.springjwt.config;
 
 import com.bezkoder.springjwt.filter.ApiLoggingFilter;
 
+import com.bezkoder.springjwt.filter.FirstLoginFilter;
 import com.bezkoder.springjwt.filter.GlobalExceptionHandlerFilter;
 import com.bezkoder.springjwt.handler.CustomAccessDeniedHandler;
 import jakarta.servlet.http.HttpServletResponse;
@@ -117,6 +118,7 @@ public class WebSecurityConfig {//extends WebSecurityConfigurerAdapter  {
         http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(apiLoggingFilter, UsernamePasswordAuthenticationFilter.class);  // Logging filter
         http.addFilterBefore(new GlobalExceptionHandlerFilter(), AuthorizationFilter.class);  // Logging filter
+        http.addFilterBefore(new FirstLoginFilter(authenticationManager(new AuthenticationConfiguration())), ApiLoggingFilter.class);  // Logging filter
 
         return http.build();
     }

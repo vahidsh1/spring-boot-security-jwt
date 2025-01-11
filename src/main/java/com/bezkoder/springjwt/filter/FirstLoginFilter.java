@@ -2,6 +2,7 @@ package com.bezkoder.springjwt.filter;
 
 import com.bezkoder.springjwt.entity.UserEntity;
 import com.bezkoder.springjwt.entity.UserEntity;
+import com.bezkoder.springjwt.security.services.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,9 +26,9 @@ public class FirstLoginFilter extends BasicAuthenticationFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth != null && auth.isAuthenticated()) {
-            UserEntity user = (UserEntity) auth.getPrincipal(); // Assuming you're using UserDetails
+            UserDetailsImpl user = (UserDetailsImpl) auth.getPrincipal(); // Assuming you're using UserDetails
 
-            if (user.isFirstLogin() && !request.getRequestURI().equals("/auth/change-password")) {
+            if (user.isFirstLogin() && !request.getRequestURI().equals("/api/auth/change-password")) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "First-time users must change their password.");
                 return;
             }
