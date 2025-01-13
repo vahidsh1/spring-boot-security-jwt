@@ -204,3 +204,11 @@ Run both Back-end & Front-end in one place:
 > [Integrate React.js with Spring Boot Rest API](https://bezkoder.com/integrate-reactjs-spring-boot/)
 
 > [Integrate Vue.js with Spring Boot Rest API](https://bezkoder.com/integrate-vue-spring-boot/)
+
+Redis configuration:
+docker run --name redis -p 6379:6379 -d redis
+docker exec -it redis redis-cli -u redis://localhost:6379
+
+RPUSH mylist "Hello"
+LRANGE mylist 0
+keys *
