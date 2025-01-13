@@ -1,11 +1,17 @@
 package com.bezkoder.springjwt.security.jwt;
 
 import java.security.Key;
+import java.security.Timestamp;
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import org.hibernate.type.descriptor.jdbc.TimestampWithTimeZoneJdbcType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,5 +94,19 @@ public class JwtUtils {
 //            logger.error("JWT claims string is empty.");
 //        }
 
+    }
+
+    public Date getExpirationFromToken(String token) {
+        try {
+            DecodedJWT decodedJWT = JWT.decode(token);
+            return decodedJWT.getExpiresAt();
+        } catch (Exception e) {
+            throw new JwtException("Invalid JWT token");
+        }
+    }
+
+    boolean isJWTExpired(DecodedJWT decodedJWT) {
+        Date expiresAt = decodedJWT.getExpiresAt();
+        return expiresAt.before(new Date());
     }
 }

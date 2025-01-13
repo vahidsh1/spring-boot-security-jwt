@@ -31,7 +31,8 @@ public enum ResponseCode {
     SERVICE_UNAVAILABLE("5001", "Service temporarily unavailable"),
     ACCESS_DENIED("5002", "You dont have permission"),
     CURRENT_PASSWORD_MISMATCH("5003", "Current password in not correct"),
-    ROLE_NOT_FOUND("5004", "The roles you entered are not valid !!! ");
+    ROLE_NOT_FOUND("5004", "The roles you entered are not valid !!! "),
+    INVALID_TOKEN_OWNER("5005", "Invalid token owner ");
 
     private final String code;
     private final String message;

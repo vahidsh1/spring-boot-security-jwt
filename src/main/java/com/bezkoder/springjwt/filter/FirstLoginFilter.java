@@ -33,7 +33,7 @@ public class FirstLoginFilter extends OncePerRequestFilter {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.isAuthenticated()) {
                 UserDetailsImpl user = (UserDetailsImpl) auth.getPrincipal(); // Assuming you're using UserDetails
-                if (user.isFirstLogin() && !request.getRequestURI().equals("/api/auth/change-password")) {
+                if (user.isFirstLogin() && !request.getRequestURI().equals("/api/auth/change-password") && !request.getRequestURI().equals("/api/auth/logout")) {
                     logger.error("Cannot set user authentication: ");
                     String message = "First-time users must change their password.";
                     handleErrorResponse.handleErrorResponse(response, HttpStatus.BAD_REQUEST, message, request.getPathInfo());
