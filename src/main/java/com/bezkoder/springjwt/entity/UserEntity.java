@@ -59,5 +59,6 @@ public class UserEntity extends UserDetailsImpl {
     }
 
 
-
+    public UserEntity(String username, String email, Set<Role> roles) {
+    }
 }

@@ -32,7 +32,10 @@ public enum ResponseCode {
     ACCESS_DENIED("5002", "You dont have permission"),
     CURRENT_PASSWORD_MISMATCH("5003", "Current password in not correct"),
     ROLE_NOT_FOUND("5004", "The roles you entered are not valid !!! "),
-    INVALID_TOKEN_OWNER("5005", "Invalid token owner ");
+    INVALID_TOKEN_OWNER("5005", "Invalid token owner "),
+    USER_REGISTERED_SUCCESSFULLY("5006", "User registered successfully  " ),
+    PASSWORD_SAME_AS_OLD("5007", "Password is same as before " ),
+    INCORRECT_CURRENT_PASSWORD("5008", "Current password is not correct " );
 
     private final String code;
     private final String message;
